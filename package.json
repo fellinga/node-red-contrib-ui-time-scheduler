@@ -1,0 +1,16 @@
+{
+  "name": "node-red-contrib-ui-time-scheduler",
+  "version": "0.0.1",
+  "description": "A time scheduler for the Node-RED Dashboard",
+  "main": "time-scheduler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mario Fellinger <mario.fellinger@outlook.com",
+  "license": "ISC",
+  "node-red" : {
+    "nodes": {
+      "time_scheduler": "time-scheduler.js"
+      }
+    }
+}
