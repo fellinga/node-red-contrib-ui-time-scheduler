@@ -1,7 +1,7 @@
 {
   "name": "node-red-contrib-ui-time-scheduler",
-  "version": "0.0.1",
-  "description": "A time scheduler for the Node-RED Dashboard",
+  "version": "0.1.0",
+  "description": "A ui time scheduler for the Node-RED Dashboard",
   "main": "time-scheduler.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

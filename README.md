@@ -2,6 +2,12 @@
 A node-red ui time scheduler for the Node-RED Dashboard.
 
 # History
+Version 0.1.0
+
+new concept, new gui
+
+################
+
 Version 0.0.1
 
 Initial release

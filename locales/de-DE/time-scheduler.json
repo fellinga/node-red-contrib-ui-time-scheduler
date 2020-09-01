@@ -1,0 +1,6 @@
+{
+    "time-scheduler" : {
+        "payloadReceived": "Payload erhalten.",
+        "invalidPayload": "Ungültige Payload."
+    }
+}

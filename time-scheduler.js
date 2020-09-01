@@ -2,35 +2,136 @@ module.exports = function(RED) {
 	'use strict';
 
 	function HTML(config) {
-		if (config.height == 0) config.height = 3;
+		if (config.height == 0) config.height = 1;
+		if (config.name === "") config.name = "Time-Scheduler";
+		const uniqueId = config.id.replace(".", "");
+		const divPrimary = "ui-ts-" + uniqueId;
 		var configAsJson = JSON.stringify(config);
 	
-		var html = String.raw`
-		<div id="timescheduler-` + config.id + `" ng-init='init(` + configAsJson + `)'  style="height: ` + config.height*50 + `px">
-			<div style="margin-bottom: 10px;">
-				<select id="select" ng-model="select" ng-change="changedValue(select)" ng-options="day for day in days" style="width: 70%; height: 36px;"> </select>
-				<button id="editScheduleBtn" style="float: right; width: 20%;" class="md-button" ng-click="updateView()"> Edit </button>
+		var styles = String.raw`
+		<style>
+			#` + divPrimary + ` {
+				padding-left: 6px;
+				padding-right: 7px;
+			}
+			#` + divPrimary + ` tr {
+				height: 36px;
+				text-align: center;
+			}
+			#` + divPrimary + ` tr:focus {
+				outline: 0;
+			}
+			#` + divPrimary + ` md-input-container {
+				width: 100%;
+			 }
+			.weekDay-` + uniqueId + ` {
+				width: 100%;
+				line-height: 40px;
+				border-radius: 50%;
+				color: var(--nr-dashboard-widgetTextColor);
+				background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
+				opacity: 0.4;
+			}
+			.weekDayActive-` + uniqueId + ` {
+				opacity: 1;
+			}
+			.timerhead-` + uniqueId + ` {
+				background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
+			}
+		</style>`
+		;
+
+		var timerBody = String.raw`
+		<div id="` + divPrimary + `" ng-init='init(` + configAsJson + `)' style="height: ` + (40 + (config.height*125)) + `px;">
+			<div layout="row" layout-align="space-between center">
+				<span flex=""> ` + config.name + ` </span>
+				<md-button flex="15" id="addTimerBtn-` + uniqueId + `" aria-label="Add" ng-click="toggleViews()"> </md-button>
 			</div>
-			<div id="seeSchedule">
-			</div>
-			<div id="changeSchedule" style="display:none;">
-				<table class="table table-striped">
-					<tbody>
-						<tr ng-repeat="n in msg.payload[0] track by $index" ng-init='hour=$index'>
-							<td ng-click="click(hour,4)">{{padZero(hour)}}:</td>
-							<td ng-click="click(hour,quarter)" ng-repeat="q in msg.payload[0][0] track by $index" ng-init='quarter=$index' bgcolor="{{((msg.payload[selectedDay][hour][quarter] || 0) === 0) ? '` + config.bgcolor + `' : '` + config.bgactivecolor + `'}}"  align="center" width="25%">
-								{{padZero(quarter*15)}}-{{(quarter+1)*15}}
-							</td>
-						</tr> 
-					</tbody>
+			<div id="messageBoard-` + uniqueId + `" style="display:none;"> <p> </p> </div>
+			<div id="timersView-` + uniqueId + `" style="margin-top: 4px;">
+				<table style="width: 100%; border-spacing: 0px;">
+				<tbody>
+					<tr ng-repeat-start="timer in timers track by $index" ng-click="showAddView($index)" class="timerhead-` + uniqueId + `">
+						<th> # </th>
+						<th colspan="2"> Start </th>
+						<th colspan="2"> End </th>
+						<th colspan="2"> {{timer.onlySendStart.isActivated ? "Event" : "Runtime" }} </th>
+					</tr>
+					<tr ng-click="showAddView($index)">
+						<td> {{$index+1}} </td>
+						<td colspan="2"> {{millisToTime(timer.starttime)}} </td>
+						<td colspan="2"> {{timer.onlySendStart.isActivated ? "-" : millisToTime(timer.endtime) }} </td>
+						<td colspan="2"> {{timer.onlySendStart.isActivated ? (timer.onlySendStart.valueToRun ? "on" : "off") : minutesToReadable(diff(timer.starttime,timer.endtime))}} </td>
+					</tr> 
+					<tr ng-click="showAddView($index)">
+						<td ng-repeat="day in days" ng-init="dayIndex=$index" style="width:14%;margin: 0 2%;"> 
+							<div class="weekDay-` + uniqueId + ` {{(timer.days[dayIndex]) ? 'weekDayActive-` + uniqueId + `' : ''}}"">
+								{{days[dayIndex]}}	
+							</div>
+						</td> 
+					</tr>
+					<tr ng-repeat-end style="height: 6px;"> </tr>
+				</tbody>
 				</table>
-				<div style="margin-top: 10px;">
-					<span style="line-height: 36px;">  <input type="checkbox" ng-model="checkbox" ng-init="checkbox = checkbox || false"> Apply {{select}} to all days </span>
-					<button style="float: right;" class="md-button" ng-click="saveSched()"> Save </button>
-				</div>
+			</div>
+			<div id="addTimerView-` + uniqueId + `" style="display:none;">
+				<form ng-submit="addTimer()">
+					<div layout="row" style="max-height: 60px;">
+						<md-input-container flex="50">
+							<label style="color: #ffffff">Schedule type</label>
+							<md-select ng-model="onlySendStart.isActivated">
+								<md-option ng-value="false"> Time frame </md-option>
+								<md-option ng-value="true"> Point in time</md-option>
+							</md-select>
+						</md-input-container>
+						<md-input-container flex="50" ng-show="!onlySendStart.isActivated">
+							<label style="color: #ffffff">Update frequency</label>
+							<md-select ng-model="sendContinuous">
+								<md-option ng-value="false">at start & end</md-option>
+								<md-option ng-value="true"> every minute  </md-option>
+							</md-select>
+						</md-input-container>
+					</div>
+					<div layout="row" style="max-height: 60px;">
+						<md-input-container flex="50">
+							<label style="color: #ffffff">Starttime</label>
+							<input id="timerStarttime-` + uniqueId + `" ng-model="timerStarttime" type="time" required>
+							<span class="validity"></span>
+						</md-input-container>
+						<md-input-container flex="50" ng-hide="onlySendStart.isActivated">
+							<label style="color: #ffffff">Endtime</label>
+							<input id="timerEndtime-` + uniqueId + `" ng-model="timerEndtime" type="time" required>
+							<span class="validity"></span>
+						</md-input-container>
+						<md-input-container flex="50" ng-show="onlySendStart.isActivated"> 
+							<label style="color: #ffffff">Select action</label>
+							<md-select ng-model="onlySendStart.valueToRun">
+								<md-option ng-value="true" selected> On  </md-option>
+								<md-option ng-value="false" > Off  </md-option>
+							</md-select>
+						</md-input-container>
+					</div>
+					<div layout="row" style="max-height: 60px;">
+						<md-input-container>
+							<label style="color: #ffffff">Select active days</label>
+							<md-select multiple="true" placeholder="Select active days" ng-model="myMultipleSelect">
+								<md-option ng-repeat="day in days" value={{$index}}> {{days[$index]}}  </md-option>
+							</md-select>
+						</md-input-container>
+					</div>
+					<div layout="row" layout-align="space-between end">
+						<md-button ng-click="deleteTimer()" ng-show="hiddenTimerIndex !== undefined"> Delete </md-button>
+						<span ng-show="hiddenTimerIndex === undefined"> </span>
+						<md-button type="submit"> Save </md-button>
+					</div>
+				</form>
 			</div>
 		</div>
 		`;
+
+		var html = String.raw`
+		${styles}		
+		${timerBody}`
 		return html;
 	}
 
@@ -55,7 +156,7 @@ module.exports = function(RED) {
 
 			RED.nodes.createNode(this,config);
 			let node = this;
-			let mySchedule = [];
+			let nodeTimers = [];
 			
 			if (checkConfig(config, node)) {
 				var done = ui.addWidget({
@@ -66,226 +167,249 @@ module.exports = function(RED) {
 					order: config.order,
 					emitOnlyNewValues: false,
 					forwardInputMessages: false,
-					storeFrontEndInputAsState: false,
+					storeFrontEndInputAsState: true,
+					persistantFrontEndValue : true,
 					beforeEmit: function (msg, value) {
-						if (msg.create) {
-							delete msg.create;
-							msg.payload = new Array(7);
-							for (var i = 0; i < 7; i++) {
-								msg.payload[i] = new Array(24);
-								for (var j = 0; j < 24; j++) {
-									msg.payload[i][j] = new Array(4);
-									for (var k = 0; k < 4; k++) {
-										msg.payload[i][j][k] = 0;
-									}
+						let valid = true;
+
+						try {
+							msg.payload = JSON.parse(value).timers;
+							msg.payload.forEach(element => {
+								if (element.starttime === undefined || element.endtime === undefined || element.days === undefined) {
+									valid = false;
 								}
-							}
-							node.status({fill:"yellow",shape:"ring",text:"New schedule created"});
-							mySchedule = msg.payload;
-						} else if(Array.isArray(msg.payload) && Array.isArray(msg.payload[6][23])) {
-							node.status({fill:"green",shape:"ring",text:"Received schedule"});
-							mySchedule = msg.payload;
-						} else {
-							node.status({fill:"red",shape:"ring",text:"Invalid msg.payload"});
-							msg.payload = null;
+							});
+						} catch(e) {
+							valid = false;
 						}
 						
+						if (valid) {
+							node.status({fill:"green",shape:"dot",text:"time-scheduler.payloadReceived"});
+							nodeTimers = msg.payload;
+						} else {
+							node.status({fill:"yellow",shape:"dot",text:"time-scheduler.invalidPayload"});
+							nodeTimers = [];
+							msg.payload = [];
+						}
+
 						return {msg: msg};
 					},
 					beforeSend: function (msg, orig) {
-						if (orig) {
-							mySchedule = orig.msg[0].payload;
+						if (orig && orig.msg[0]) {
+							nodeTimers = orig.msg[0].payload;
+							orig.msg[0].payload = JSON.stringify({timers : orig.msg[0].payload});
 							return orig.msg;
 						}
 					},
 					initController: function ($scope) {
 						$scope.init = function (config) {
-							$scope.timeschedulerid = "timescheduler-".concat(config.id);
-
-							if (!config.initday) {
-								var today = new Date();
-								config.initday = today.getDay();
-							}
-
-							$scope.days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-							$scope.selectedDay = config.initday;
-							$scope.select = $scope.days[$scope.selectedDay];
+							$scope.timeschedulerid = config.id.replace(".", "");
+							$scope.days = ['SU','MO','TU','WE','TH','FR','SA'];
 						}
 
 						$scope.$watch('msg', function(msg) {
-							$scope.printScheduleTable();
+							// msg after beforeEmit (noJSON) -> from input 
+							if (msg && msg.payload) {
+								$scope.timers = angular.copy(msg.payload);
+							// msg turnes into an array after hitting F5 or switching tabs
+							} else if (msg && msg[0] && msg[0].payload) {
+								// page refresh (F5) sends the msg object that was created after beforeSend (JSON)
+								// switching tabs sends ?the last known msg object? (noJSON)
+								const data = angular.fromJson(msg[0].payload).timers;
+								if (data !== undefined) {
+									$scope.msg[0].payload = data;
+								}
+								// since the msg is an array now -> map back to single msg object
+								$scope.msg = $scope.msg[0];
+							}
+							$scope.showStandardView();
 						});
 
-						// Update preview
-						$scope.printScheduleTable = function() {
-							var div = $scope.getElement("seeSchedule");
-							div.innerHTML = '';
-
-							if (!$scope.msg || !$scope.msg.payload) {
-								$scope.getElement("editScheduleBtn").disabled = true;
-								$scope.getElement("select").disabled = true;
-
-								var noPayload = document.createElement('p');
-								noPayload.innerHTML = "Invalid or no payload provided.";
-								div.append(noPayload);
+						$scope.toggleViews = function() {
+							if ($scope.getElement("addTimerView").style.display === "block") {
+								$scope.showStandardView();
 							} else {
-								$scope.getElement("editScheduleBtn").disabled = false;
-								$scope.getElement("select").disabled = false;
-
-								var hours = [0,15,30,45];
-								var value = 0;
-								var oldValue = 0;
-								var found = 0;
-								var schedules = [];
-	
-								for (var i = 0; i < 24; i ++) {
-									for (var j = 0; j < 4; j ++) {
-										value = $scope.msg.payload[$scope.selectedDay][i][j];
-										if (value != oldValue)
-											schedules[found++] = $scope.padZero(i) + ":" + $scope.padZero(hours[j]);
-	
-										oldValue = value;
-	
-										// cornercase: end of the day
-										if (i === 23 && j === 3 && oldValue === 1)
-											schedules[found++] = "24:00";
-									}
-								}
-	
-								if (found == 0) {
-									var p = document.createElement('p');
-									p.innerHTML = "Nothing planned for " + $scope.days[$scope.selectedDay] + ". Click edit to modify the schedule.";
-									div.append(p);
-								} else {
-									var table = document.createElement('table');
-									table.setAttribute('class', "table table-striped");
-									table.setAttribute('width', "100%");
-									var tbody = document.createElement('tbody');
-									table.append(tbody);
-									div.append(table);
-	
-									var tr = document.createElement('tr');
-									var th0 = document.createElement('th');
-									var th1 = document.createElement('th');
-									th0.appendChild(document.createTextNode("From"));
-									th1.appendChild(document.createTextNode("To"));
-									tr.append(th0);
-									tr.append(th1);
-									tbody.append(tr);
-		
-									for (var i = 0; i < found; i = i+2) {
-										var tr = document.createElement('tr');
-										var from = document.createElement('td');
-										var to = document.createElement('td');
-										from.appendChild(document.createTextNode(schedules[i]));
-										from.setAttribute('width', "50%");
-										from.style.textAlign = "center";
-										to.appendChild(document.createTextNode(schedules[i+1]));
-										to.setAttribute('width', "50%");
-										to.style.textAlign = "center";
-										tr.append(from);
-										tr.append(to);
-										tbody.append(tr);
-									}
-								}
+								$scope.showAddView();
 							}
+						}
+
+						$scope.showStandardView = function() {
+							$scope.getElement("addTimerBtn").innerHTML = "&#10010";
+							$scope.getElement("addTimerBtn").disabled = false;
+							$scope.getElement("timersView").style.display = "block";
+							$scope.getElement("messageBoard").style.display = "none";
+							$scope.getElement("addTimerView").style.display = "none";
+
+							if (!$scope.timers) {
+								$scope.getElement("timersView").style.display = "none";
+								$scope.getElement("addTimerBtn").disabled = true;
+								
+								let msgBoard = $scope.getElement("messageBoard");
+								msgBoard.style.display = "block";
+								msgBoard.firstElementChild.innerHTML = "Invalid or no payload provided.";								
+							} else if ($scope.timers.length === 0) {
+								$scope.getElement("timersView").style.display = "none";
+
+								let msgBoard = $scope.getElement("messageBoard");
+								msgBoard.style.display = "block";
+								msgBoard.firstElementChild.innerHTML = "Nothing planned yet. Click the plus sign to add a new timer.";
+							}
+						}
+
+						$scope.showAddView = function(timerIndex) {
+							$scope.getElement("addTimerBtn").innerHTML = "X";
+							$scope.getElement("timersView").style.display = "none";
+							$scope.getElement("messageBoard").style.display = "none";
+							$scope.getElement("addTimerView").style.display = "block";
+							$scope.hiddenTimerIndex = timerIndex;
+							$scope.myMultipleSelect = [];
 							
-											
+							if (timerIndex === undefined) {
+								const today = new Date();
+								$scope.timerStarttime = new Date(1970, 0, 1, today.getHours(), today.getMinutes()+1, 0);
+								$scope.timerEndtime = new Date(1970, 0, 1, today.getHours(), today.getMinutes()+6, 0);
+								$scope.myMultipleSelect.push(today.getDay());
+								$scope.sendContinuous = true;
+								$scope.onlySendStart.isActivated = false;
+								$scope.onlySendStart.valueToRun = true;
+							} else {
+								const timer = $scope.timers[timerIndex];						
+								$scope.timerStarttime = new Date(timer.starttime);
+								$scope.timerEndtime = new Date(timer.endtime);
+								for (let [index, val] of timer.days.entries()) {
+									val === 1 ? $scope.myMultipleSelect.push(index) : "";
+								}
+								$scope.sendContinuous = timer.sendContinuous;
+								$scope.onlySendStart.isActivated = timer.onlySendStart.isActivated;
+								$scope.onlySendStart.valueToRun = timer.onlySendStart.valueToRun;
+							}
 						}
 
-						// Clicked edit
-						$scope.updateView = function() {
-							var x = $scope.getElement("seeSchedule");
-							var y = $scope.getElement("changeSchedule");
+						$scope.addTimer = function() {
+							const starttime = $scope.timerStarttime.getTime();
+							let endtime = $scope.timerEndtime.getTime();
 
-							if (x.style.display === "none") {
-							  y.style.display = "none";
-							  x.style.display = "block";
-							  $scope.getElement("editScheduleBtn").innerHTML = "Edit";
-							} else {
-							  x.style.display = "none";
-							  y.style.display = "block";
-							  $scope.getElement("editScheduleBtn").innerHTML = "X";
+							if (!$scope.onlySendStart.isActivated && $scope.diff(starttime, endtime) < 1) {
+								alert(	"Incorrect settings detected!" + '\n' +  
+										"- at least 1 minute" + '\n' + 
+										"- must not exceed midnight"  
+							  	);
+								return;
 							}
-						}
-						
-						// Clicked on a cell
-						$scope.click = function(hour, quarter) {
-							// clicked hour, so apply to whole row
-							if (quarter == $scope.msg.payload[0][0].length) {
-								var num = $scope.msg.payload[$scope.selectedDay][hour][0];
-								for (var i = 0; i < $scope.msg.payload[0][0].length; i++) {
-									$scope.msg.payload[$scope.selectedDay][hour][i] = 1 - num;
+
+							const timer = {
+								starttime: starttime,
+								endtime: endtime,
+								days : [0,0,0,0,0,0,0],
+								sendContinuous: $scope.sendContinuous,
+								onlySendStart: {
+									isActivated : $scope.onlySendStart.isActivated,
+									valueToRun : $scope.onlySendStart.valueToRun
 								}
-							// apply to single cell only
+							};
+
+							$scope.myMultipleSelect.forEach(day => {
+								timer.days[day] = 1;
+							});
+
+							const timerIndex = $scope.hiddenTimerIndex;
+							if (timerIndex === undefined) {
+								$scope.timers.push(timer);
 							} else {
-								var num = $scope.msg.payload[$scope.selectedDay][hour][quarter];
-								$scope.msg.payload[$scope.selectedDay][hour][quarter] = 1 - num;
+								$scope.timers.splice(timerIndex,1,timer);
 							}
+
+							$scope.timers.sort(function(a, b) {
+								return $scope.diff(b.starttime,a.starttime);
+							});
+							$scope.sendTimersToOutput();		
 						}
-						
-						// Changed weekday
-						$scope.changedValue = function(value) {
-							$scope.selectedDay = $scope.days.indexOf(value);
-							$scope.printScheduleTable();
+
+						$scope.deleteTimer = function() {
+							$scope.timers.splice($scope.hiddenTimerIndex,1);
+							$scope.sendTimersToOutput();
 						}
-						
-						// Clicked save
-						$scope.saveSched = function() {
-							// if checkbox checked apply selectedDay to all days
-							if ($scope.checkbox) {
-								for (var i = 0; i < $scope.msg.payload.length; i++) {
-									for (var j = 0; j < $scope.msg.payload[0].length; j++) {
-										for (var k = 0; k < $scope.msg.payload[0][0].length; k++) {
-											var value = $scope.msg.payload[$scope.selectedDay][j][k];
-											$scope.msg.payload[i][j][k] = value;
-										}
-									}
-								}
-							}
-							$scope.printScheduleTable();
-							$scope.updateView();
-							$scope.send([$scope.msg, null]);	
+
+						$scope.sendTimersToOutput = function() {
+							$scope.msg.payload = angular.copy($scope.timers);
+							$scope.send([$scope.msg,null]);
+						}
+
+						$scope.minutesToReadable = function(minutes) {
+							return (Math.floor(minutes/60) > 0 ? Math.floor(minutes/60) + "h " : "") + minutes%60 + "m";
+						}
+
+						$scope.millisToTime = function(millis) {
+							return $scope.padZero(new Date(millis).getHours()) + ":" + $scope.padZero(new Date(millis).getMinutes()); 
 						}
 
 						$scope.padZero = function(i) {
-							if (i < 10) i = "0" + i;
-							return i;
+							return i < 10 ? "0"+i : i;
+						}
+
+						$scope.diff = function(startDate, endDate) {						
+							let diff = endDate - startDate;
+							const hours = Math.floor(diff / 1000 / 60 / 60);
+							diff -= hours * 1000 * 60 * 60;
+							const minutes = Math.floor(diff / 1000 / 60);
+							
+							return (hours*60)+minutes;
 						}
 
 						$scope.getElement = function(elementId) {
-							return document.getElementById($scope.timeschedulerid).querySelector("#" + elementId);
+							return document.querySelector("#" + elementId + "-" + $scope.timeschedulerid);
 						}
 					}
 				});
 				node.on("close", done);
 
 				setInterval(function() {
-					if (mySchedule.length == 7) {
-						node.send([null, {payload: isInTime() }]);
+					if (nodeTimers.length > 0) {
+						const date = new Date();
+						const today = date.getDay();
+						const currentHour = date.getHours();
+						const currentMinute = date.getMinutes();
+						
+						nodeTimers.forEach(function (timer) {
+							if (timer.days[today] === 0) return;
+
+							const onHour = new Date(timer.starttime).getHours();
+							const onMinute = new Date(timer.starttime).getMinutes();
+							const offHour = new Date(timer.endtime).getHours();
+							const offMinute = new Date(timer.endtime).getMinutes();
+
+							// SEND ON
+							if (currentHour === onHour && currentMinute === onMinute) {
+								if (timer.onlySendStart.isActivated) {
+									node.send([null, {payload: timer.onlySendStart.valueToRun}]);
+								} else {
+									node.send([null, {payload: true}]);
+								}
+							}
+							
+							// SEND CONTINUOUSLY
+							if (timer.sendContinuous) {
+								if (currentHour > onHour && currentHour < offHour) {
+										node.send([null, {payload: true}]);
+								} else if (currentHour > onHour && currentHour === offHour && currentMinute < offMinute) {
+										node.send([null, {payload: true}]);
+								} else if (currentHour === onHour && currentHour < offHour && currentMinute > onMinute) {
+										node.send([null, {payload: true}]);
+								} else if (currentHour === onHour && currentHour === offHour 
+									&& currentMinute > onMinute && currentMinute < offMinute) {
+										node.send([null, {payload: true}]);
+								}
+							}
+
+							// SEND OFF
+							if (currentHour === offHour && currentMinute === offMinute && !timer.onlySendStart.isActivated) {
+								node.send([null, {payload: false}]);
+							}
+						});
 					}
 				}, 60000);
 
-				function isInTime() {
-					var today = new Date();
-					var hour = today.getHours();
-					var day = today.getDay();
-					var minutes = today.getMinutes();
-					var quarter = 0;
-					
-					if (minutes <= 15) quarter = 0;
-					else if (minutes <= 30) quarter = 1;
-					else if (minutes <= 45) quarter = 2;
-					else if (minutes <= 60) quarter = 3;
-			
-					if (mySchedule[day][hour][quarter] == 1) {
-						return true;
-					}
-			
-					return false;
-				}
 			}
-
 		} catch(error) {
 			console.log("TimeSchedulerNode:", error);
 		}
