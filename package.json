@@ -11,6 +11,10 @@
   "node-red" : {
     "nodes": {
       "time_scheduler": "time-scheduler.js"
-      }
     }
+  },
+  "keywords": [
+    "node-red",
+    "time-scheduler"
+  ]
 }
