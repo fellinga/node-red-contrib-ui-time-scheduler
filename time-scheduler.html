@@ -23,7 +23,7 @@
         <dt>payload
             <span class="property-type">array</span>
         </dt>
-        <dd> schedule as json array </dd>
+        <dd> schedule as (stringified) json array </dd>
     </dl>
 
  <h3>Outputs</h3>
@@ -31,31 +31,54 @@
          <li> Outputs new schedule
              <dl class="message-properties">
                  <dt>payload <span class="property-type">array</span></dt>
-                 <dd>the modified time-schedule</dd>
-                 <dd>interval: only after save/delete</dd>
+                 <dd>the modified or new time-schedule</dd>
              </dl>
          </li>
          <li> Outputs timer value
              <dl class="message-properties">
                  <dt>payload <span class="property-type">boolean</span></dt>
-                 <dd>true or false, depening on the schedule</dd>
-                 <dd>interval: only at the exact specified time</dd>
+                 <dd>true or false, depening on your schedule</dd>
              </dl>
          </li>
      </ol>
 
 <h3>Details</h3>
-    <p>Incoming <code>msg.payload</code> is used as the schedule data. If the
-    incoming payload is an empty array a new (empty) schedule will be created </p>
-    <p>The data can be modified within the browser and is then sent out again
-    via <code>msg.payload</code>.</p>
-    <p> To show the correct data after a browser refresh the top output 
-    has to be connected to the input (function node including 'return msg;'). 
-    See examples on GitHub for more details. </p>
+    <p> Incoming <code>msg.payload</code> is used as the schedule data. If the 
+        incoming payload is an empty array or invalid a new (empty) schedule will
+        be created. 
+    </p>
+    <p> To create a new schedule click the nodes plus sign at the right top 
+        corner (at the frontend/dashboard)
+    </p>
+    <h4>Schedule settings</h4>
+    <dl>
+        <dt>Schedule type</dt>
+            <dl>
+                <dt>Time frame</dt>
+                <dd>a time frame has a well defined start and end time with
+                a resulting ON action at starttime and OFF action at endtime.</dd>
+                <dt>Point in time</dt>
+                <dd>only one event (ON/OFF) will be sent at starttime.</dd>
+            </dl>
+        <dt>Update frequency</dt>
+            <dl>
+                <dt>Every minute</dt>
+                <dd>Sends true/false every 60 seconds.</dd>
+                <dt>at start & end</dt>
+                <dd>Sends true at starttime and false at endtime.</dd>
+            </dl>
+        <dt>Select action</dt>
+            <dl>
+                <dt>On</dt>
+                <dd>output 2 sends true at starttime</dd>
+                <dt>Off</dt>
+                <dd>output 2 sends false at starttime</dd>
+            </dl>
+    </dl>
 
 <h3>References</h3>
     <ul>
-        <li><a href="https://github.com/fellinga">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://github.com/fellinga/node-red-contrib-ui-time-scheduler">GitHub</a> - the nodes github repository</li>
     </ul>
 </script>
 
