@@ -55,13 +55,13 @@ module.exports = function(RED) {
 						<th> # </th>
 						<th colspan="2"> Start </th>
 						<th colspan="2"> End </th>
-						<th colspan="2"> {{timer.onlySendStart.isActivated ? "Event" : "Runtime" }} </th>
+						<th colspan="2"> Runtime </th>
 					</tr>
 					<tr ng-click="showAddView($index)">
 						<td> {{$index+1}} </td>
 						<td colspan="2"> {{millisToTime(timer.starttime)}} </td>
-						<td colspan="2"> {{timer.onlySendStart.isActivated ? "-" : millisToTime(timer.endtime) }} </td>
-						<td colspan="2"> {{timer.onlySendStart.isActivated ? (timer.onlySendStart.valueToRun ? "on" : "off") : minutesToReadable(diff(timer.starttime,timer.endtime))}} </td>
+						<td colspan="2"> {{millisToTime(timer.endtime)}} </td>
+						<td colspan="2"> {{minutesToReadable(diff(timer.starttime,timer.endtime))}} </td>
 					</tr> 
 					<tr ng-click="showAddView($index)">
 						<td ng-repeat="day in days" ng-init="dayIndex=$index" style="width:14%;margin: 0 2%;"> 
@@ -78,37 +78,14 @@ module.exports = function(RED) {
 				<form ng-submit="addTimer()">
 					<div layout="row" style="max-height: 60px;">
 						<md-input-container flex="50">
-							<label style="color: #ffffff">Schedule type</label>
-							<md-select ng-model="onlySendStart.isActivated">
-								<md-option ng-value="false"> Time frame </md-option>
-								<md-option ng-value="true"> Point in time</md-option>
-							</md-select>
-						</md-input-container>
-						<md-input-container flex="50" ng-show="!onlySendStart.isActivated">
-							<label style="color: #ffffff">Update frequency</label>
-							<md-select ng-model="sendContinuous">
-								<md-option ng-value="false">at start & end</md-option>
-								<md-option ng-value="true"> every minute  </md-option>
-							</md-select>
-						</md-input-container>
-					</div>
-					<div layout="row" style="max-height: 60px;">
-						<md-input-container flex="50">
 							<label style="color: #ffffff">Starttime</label>
 							<input id="timerStarttime-` + uniqueId + `" ng-model="timerStarttime" type="time" required>
 							<span class="validity"></span>
 						</md-input-container>
-						<md-input-container flex="50" ng-hide="onlySendStart.isActivated">
+						<md-input-container flex="50">
 							<label style="color: #ffffff">Endtime</label>
 							<input id="timerEndtime-` + uniqueId + `" ng-model="timerEndtime" type="time" required>
 							<span class="validity"></span>
-						</md-input-container>
-						<md-input-container flex="50" ng-show="onlySendStart.isActivated"> 
-							<label style="color: #ffffff">Select action</label>
-							<md-select ng-model="onlySendStart.valueToRun">
-								<md-option ng-value="true" selected> On  </md-option>
-								<md-option ng-value="false" > Off  </md-option>
-							</md-select>
 						</md-input-container>
 					</div>
 					<div layout="row" style="max-height: 60px;">
@@ -198,6 +175,7 @@ module.exports = function(RED) {
 						if (orig && orig.msg[0]) {
 							nodeTimers = orig.msg[0].payload;
 							orig.msg[0].payload = JSON.stringify({timers : orig.msg[0].payload});
+							orig.msg[1] = {payload: isInTime() };
 							return orig.msg;
 						}
 					},
@@ -269,9 +247,6 @@ module.exports = function(RED) {
 								$scope.timerStarttime = new Date(1970, 0, 1, today.getHours(), today.getMinutes()+1, 0);
 								$scope.timerEndtime = new Date(1970, 0, 1, today.getHours(), today.getMinutes()+6, 0);
 								$scope.myMultipleSelect.push(today.getDay());
-								$scope.sendContinuous = true;
-								$scope.onlySendStart.isActivated = false;
-								$scope.onlySendStart.valueToRun = true;
 							} else {
 								const timer = $scope.timers[timerIndex];						
 								$scope.timerStarttime = new Date(timer.starttime);
@@ -279,9 +254,6 @@ module.exports = function(RED) {
 								for (let [index, val] of timer.days.entries()) {
 									val === 1 ? $scope.myMultipleSelect.push(index) : "";
 								}
-								$scope.sendContinuous = timer.sendContinuous;
-								$scope.onlySendStart.isActivated = timer.onlySendStart.isActivated;
-								$scope.onlySendStart.valueToRun = timer.onlySendStart.valueToRun;
 							}
 						}
 
@@ -289,7 +261,7 @@ module.exports = function(RED) {
 							const starttime = $scope.timerStarttime.getTime();
 							let endtime = $scope.timerEndtime.getTime();
 
-							if (!$scope.onlySendStart.isActivated && $scope.diff(starttime, endtime) < 1) {
+							if ($scope.diff(starttime, endtime) < 1) {
 								alert(	"Incorrect settings detected!" + '\n' +  
 										"- at least 1 minute" + '\n' + 
 										"- must not exceed midnight"  
@@ -301,11 +273,6 @@ module.exports = function(RED) {
 								starttime: starttime,
 								endtime: endtime,
 								days : [0,0,0,0,0,0,0],
-								sendContinuous: $scope.sendContinuous,
-								onlySendStart: {
-									isActivated : $scope.onlySendStart.isActivated,
-									valueToRun : $scope.onlySendStart.valueToRun
-								}
 							};
 
 							$scope.myMultipleSelect.forEach(day => {
@@ -364,6 +331,12 @@ module.exports = function(RED) {
 				node.on("close", done);
 
 				setInterval(function() {
+					node.send([null, {payload: isInTime() }]);
+				}, 60000);
+
+				function isInTime() {
+					let status = false;
+
 					if (nodeTimers.length > 0) {
 						const date = new Date();
 						const today = date.getDay();
@@ -371,43 +344,26 @@ module.exports = function(RED) {
 						const currentMinute = date.getMinutes();
 						
 						nodeTimers.forEach(function (timer) {
-							if (timer.days[today] === 0) return;
+							if (timer.days[today] === 0 || status) return;
 
 							const onHour = new Date(timer.starttime).getHours();
 							const onMinute = new Date(timer.starttime).getMinutes();
 							const offHour = new Date(timer.endtime).getHours();
 							const offMinute = new Date(timer.endtime).getMinutes();
-
-							// SEND ON
-							if (currentHour === onHour && currentMinute === onMinute) {
-								if (timer.onlySendStart.isActivated) {
-									node.send([null, {payload: timer.onlySendStart.valueToRun}]);
-								} else {
-									node.send([null, {payload: true}]);
-								}
-							}
 							
-							// SEND CONTINUOUSLY
-							if (timer.sendContinuous) {
-								if (currentHour > onHour && currentHour < offHour) {
-										node.send([null, {payload: true}]);
-								} else if (currentHour > onHour && currentHour === offHour && currentMinute < offMinute) {
-										node.send([null, {payload: true}]);
-								} else if (currentHour === onHour && currentHour < offHour && currentMinute > onMinute) {
-										node.send([null, {payload: true}]);
-								} else if (currentHour === onHour && currentHour === offHour 
-									&& currentMinute > onMinute && currentMinute < offMinute) {
-										node.send([null, {payload: true}]);
-								}
+							if ((currentHour === onHour && currentHour === offHour && currentMinute > onMinute && currentMinute < offMinute) || 
+							(currentHour > onHour && currentHour === offHour && currentMinute < offMinute) || 
+							(currentHour === onHour && currentHour < offHour && currentMinute > onMinute) || 
+							(currentHour === onHour && currentMinute === onMinute) ||
+							(currentHour > onHour && currentHour < offHour)) {
+								status = true;
 							}
 
-							// SEND OFF
-							if (currentHour === offHour && currentMinute === offMinute && !timer.onlySendStart.isActivated) {
-								node.send([null, {payload: false}]);
-							}
 						});
 					}
-				}, 60000);
+
+					return status;
+				}
 
 			}
 		} catch(error) {
