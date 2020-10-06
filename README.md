@@ -24,6 +24,12 @@ You can find example flows and schedules within the examples folder.
 History
 ----------
 
+Version 0.2.1
+
+improved node closing
+
+################
+
 Version 0.2.0
 
 had to remove to ability to create "point in time" schedules  

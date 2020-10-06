@@ -328,9 +328,8 @@ module.exports = function(RED) {
 						}
 					}
 				});
-				node.on("close", done);
 
-				setInterval(function() {
+				var nodeInterval = setInterval(function() {
 					node.send([null, {payload: isInTime() }]);
 				}, 60000);
 
@@ -365,6 +364,14 @@ module.exports = function(RED) {
 					return status;
 				}
 
+				node.on("close", function() {
+					if (nodeInterval) {
+						clearInterval(nodeInterval);
+					}
+					if (done) {
+						done();
+					}
+				});
 			}
 		} catch(error) {
 			console.log("TimeSchedulerNode:", error);
