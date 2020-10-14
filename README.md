@@ -24,6 +24,12 @@ You can find example flows and schedules within the examples folder.
 History
 ----------
 
+Version 0.2.2
+
+update interval can now be changed (default 60s)
+
+################
+
 Version 0.2.1
 
 improved node closing

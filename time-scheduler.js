@@ -4,6 +4,8 @@ module.exports = function(RED) {
 	function HTML(config) {
 		if (config.height == 0) config.height = 1;
 		if (config.name === "") config.name = "Time-Scheduler";
+		if (!config.refresh || config.refresh < 1) config.refresh = 60;
+		
 		const uniqueId = config.id.replace(".", "");
 		const divPrimary = "ui-ts-" + uniqueId;
 		var configAsJson = JSON.stringify(config);
@@ -331,7 +333,7 @@ module.exports = function(RED) {
 
 				var nodeInterval = setInterval(function() {
 					node.send([null, {payload: isInTime() }]);
-				}, 60000);
+				}, config.refresh * 1000);
 
 				function isInTime() {
 					let status = false;

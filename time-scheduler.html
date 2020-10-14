@@ -10,6 +10,10 @@
         <button class="editor-button" id="node-input-size"></button>
     </div>
     <div class="form-row">
+        <label for="node-input-refresh"><i class="fa fa-clock-o"></i> Refresh </label>
+        <input type="number" id="node-input-refresh" min="1"/>
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name">
     </div>
@@ -50,31 +54,10 @@
     <p> To create a new schedule click the nodes plus sign at the right top 
         corner (at the frontend/dashboard)
     </p>
-    <h4>Schedule settings</h4>
-    <dl>
-        <dt>Schedule type</dt>
-            <dl>
-                <dt>Time frame</dt>
-                <dd>a time frame has a well defined start and end time with
-                a resulting ON action at starttime and OFF action at endtime.</dd>
-                <dt>Point in time</dt>
-                <dd>only one event (ON/OFF) will be sent at starttime.</dd>
-            </dl>
-        <dt>Update frequency</dt>
-            <dl>
-                <dt>Every minute</dt>
-                <dd>Sends true/false every 60 seconds.</dd>
-                <dt>at start & end</dt>
-                <dd>Sends true at starttime and false at endtime.</dd>
-            </dl>
-        <dt>Select action</dt>
-            <dl>
-                <dt>On</dt>
-                <dd>output 2 sends true at starttime</dd>
-                <dt>Off</dt>
-                <dd>output 2 sends false at starttime</dd>
-            </dl>
-    </dl>
+    <p>
+        The <code>refresh</code> property adjusts the frequency of how often true/false
+        is sent (in seconds).
+    </p>
 
 <h3>References</h3>
     <ul>
@@ -89,6 +72,7 @@
         defaults: {
             group: {type: 'ui_group', required:true},
             name: {value: ''},
+            refresh: {value: 60},
             order: {value: 0},
             width: {
                 value: 0,
