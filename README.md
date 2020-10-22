@@ -24,41 +24,7 @@ You can find example flows and schedules within the examples folder.
 History
 ----------
 
-Version 0.2.2
-
-update interval can now be changed (default 60s)
-
-################
-
-Version 0.2.1
-
-improved node closing
-
-################
-
-Version 0.2.0
-
-had to remove to ability to create "point in time" schedules  
-might develop an extra node for this. The node now always  
-outputs 'true' or 'false' every 60 seconds.
-
-################
-
-Version 0.1.3
-
-updated help and readme
-
-################
-
-Version 0.1.0
-
-new concept, new gui
-
-################
-
-Version 0.0.1
-
-Initial release
+Find the changelog [here](CHANGELOG.md).
 
 
 # Thanks for your donation

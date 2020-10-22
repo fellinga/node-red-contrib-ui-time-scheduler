@@ -71,7 +71,9 @@ module.exports = function(RED) {
 		<div id="` + divPrimary + `" ng-init='init(` + configAsJson + `)' style="height: ` + (40 + (config.height*125)) + `px;">
 			<div layout="row" layout-align="space-between center">
 				<span flex=""> ` + config.name + ` </span>
-				<md-button flex="15" id="addTimerBtn-` + uniqueId + `" aria-label="Add" ng-click="toggleViews()"> </md-button>
+				<span flex="15">
+					<md-button id="addTimerBtn-` + uniqueId + `" style="width: 100%;" aria-label="Add" ng-click="toggleViews()"> </md-button>
+				</span>
 			</div>
 			<div id="messageBoard-` + uniqueId + `" style="display:none;"> <p> </p> </div>
 			<div id="timersView-` + uniqueId + `" style="margin-top: 4px;">
@@ -122,7 +124,7 @@ module.exports = function(RED) {
 							</md-select>
 						</md-input-container>
 					</div>
-					<div layout="row" layout-align="space-between end">
+					<div layout="row" layout-align="space-between end" style="height: 40px;">
 						<md-button ng-click="deleteTimer()" ng-show="hiddenTimerIndex !== undefined"> Delete </md-button>
 						<span ng-show="hiddenTimerIndex === undefined"> </span>
 						<md-button type="submit"> Save </md-button>
@@ -218,13 +220,16 @@ module.exports = function(RED) {
 							// msg turnes into an array after hitting F5 or switching tabs
 							} else if (msg && msg[0] && msg[0].payload) {
 								// page refresh (F5) sends the msg object that was created after beforeSend (JSON)
-								// switching tabs sends ?the last known msg object? (noJSON)
+								// switching tabs sends the last known msg object (noJSON)
 								const data = angular.fromJson(msg[0].payload).timers;
 								if (data !== undefined) {
 									$scope.msg[0].payload = data;
 								}
 								// since the msg is an array now -> map back to single msg object
 								$scope.msg = $scope.msg[0];
+							// no payload received at all and timers not defined
+							} else if (!$scope.timers) {
+								$scope.msg = {payload : []};
 							}
 							$scope.showStandardView();
 						});
