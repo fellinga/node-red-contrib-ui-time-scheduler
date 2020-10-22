@@ -43,53 +43,6 @@ SOFTWARE.
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="ui_time_scheduler">
-    <p>A ui scheduler for the Node-RED Dashboard</p>
-
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>payload
-            <span class="property-type">array</span>
-        </dt>
-        <dd> schedule as (stringified) json array </dd>
-    </dl>
-
- <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li> Outputs new schedule
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">array</span></dt>
-                 <dd>the modified or new time-schedule</dd>
-             </dl>
-         </li>
-         <li> Outputs timer value
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">boolean</span></dt>
-                 <dd>true or false, depening on your schedule</dd>
-             </dl>
-         </li>
-     </ol>
-
-<h3>Details</h3>
-    <p> Incoming <code>msg.payload</code> is used as the schedule data. You can
-        use that the inject a predefined schedule after a certain event or just
-        after a reboot. If there is no incoming payload or the incoming payload
-        is not a valid schedule a new and empty schedule will be created. 
-    </p>
-    <p> To create a new schedule click the nodes plus sign at the right top 
-        corner (at the frontend/dashboard)
-    </p>
-    <p>
-        The <code>refresh</code> property adjusts the frequency of how often true/false
-        is sent (in seconds).
-    </p>
-
-<h3>References</h3>
-    <ul>
-        <li><a href="https://github.com/fellinga/node-red-contrib-ui-time-scheduler">GitHub</a> - the nodes github repository</li>
-    </ul>
-</script>
-
 <script type="text/javascript">
     RED.nodes.registerType('ui_time_scheduler', {
         category: 'dashboard',

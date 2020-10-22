@@ -290,7 +290,7 @@ module.exports = function(RED) {
 
 						$scope.addTimer = function() {
 							const starttime = $scope.timerStarttime.getTime();
-							let endtime = $scope.timerEndtime.getTime();
+							const endtime = $scope.timerEndtime.getTime();
 
 							if ($scope.diff(starttime, endtime) < 1) {
 								alert(	"Incorrect settings detected!" + '\n' +  
@@ -318,7 +318,7 @@ module.exports = function(RED) {
 							}
 
 							$scope.timers.sort(function(a, b) {
-								return $scope.diff(b.starttime,a.starttime);
+								return a.starttime - b.starttime;
 							});
 							$scope.sendTimersToOutput();		
 						}
@@ -368,27 +368,15 @@ module.exports = function(RED) {
 					let status = false;
 
 					if (nodeTimers.length > 0) {
-						const date = new Date();
-						const today = date.getDay();
-						const currentHour = date.getHours();
-						const currentMinute = date.getMinutes();
+						const today = new Date();
+						const now = new Date(1970, 0, 1, today.getHours(), today.getMinutes(), 0).getTime();
 						
 						nodeTimers.forEach(function (timer) {
 							if (timer.days[today] === 0 || status) return;
 
-							const onHour = new Date(timer.starttime).getHours();
-							const onMinute = new Date(timer.starttime).getMinutes();
-							const offHour = new Date(timer.endtime).getHours();
-							const offMinute = new Date(timer.endtime).getMinutes();
-							
-							if ((currentHour === onHour && currentHour === offHour && currentMinute > onMinute && currentMinute < offMinute) || 
-							(currentHour > onHour && currentHour === offHour && currentMinute < offMinute) || 
-							(currentHour === onHour && currentHour < offHour && currentMinute > onMinute) || 
-							(currentHour === onHour && currentMinute === onMinute) ||
-							(currentHour > onHour && currentHour < offHour)) {
+							if (now >= timer.starttime && now < timer.endtime) {
 								status = true;
 							}
-
 						});
 					}
 
