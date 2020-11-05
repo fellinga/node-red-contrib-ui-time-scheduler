@@ -1,6 +1,28 @@
 {
     "time-scheduler" : {
         "payloadReceived": "Payload received.",
-        "invalidPayload": "Payload invalid."
+        "invalidPayload": "Payload invalid.",
+        "label": {
+            "name": "Name",
+            "size": "Size",
+            "group": "Group",
+            "refresh": "Refresh",
+            "devices": "Devices",
+            "device": "Device"
+        },
+        "copy": "copy",
+        "ui" : {
+            "start": "Start",
+            "starttime": "Starttime",
+            "end": "End",
+            "endtime": "Endtime",
+            "runtime": "Runtime",
+            "daysActive": "Select active days",
+            "save": "Save",
+            "delete": "delete",
+            "payloadWarning": "Invalid or no payload provided.",
+            "nothingPlanned": "Nothing planned yet. Click the plus sign to add a new timer.",
+            "alertTimespan": "Incorrect settings detected! \n - at least 1 minute \n - must not exceed midnight"
+        }
     }
 }

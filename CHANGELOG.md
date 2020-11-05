@@ -1,6 +1,24 @@
 # Changelog
 
 ----------
+## [v0.3.0] - 2020-11-05
+
+### New
+- added multi device support! you can now
+  control multiple devices with just one
+  scheduler node.
+- replaced plain text with i18n values, 
+  added german language support
+
+### Changed 
+- UI now actively requests data  from the
+  server instead of just relying on the 
+  msg.payload
+
+### Fixed
+- time zone handling
+
+----------
 ## [v0.2.4] - 2020-10-22
 
 ### New

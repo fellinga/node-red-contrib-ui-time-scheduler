@@ -1,0 +1,50 @@
+<script type="text/x-red" data-help-name="ui_time_scheduler">
+    <p>Ein ui scheduler für das Node-RED Dashboard</p>
+
+    <h3>Eingänge</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">JSON string</span>
+        </dt>
+        <dd> ein bestehender Zeitplan </dd>
+    </dl>
+
+    <h3>Ausgänge</h3>
+    <ol class="node-ports">
+        <li> Gibt den aktuellen Zeitplan aus
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">JSON string</span></dt>
+                <dd>ein modifizierter oder neuer Zeitplan</dd>
+            </dl>
+        </li>
+        <li> Gibt den aktuellen Zustand aus
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">boolean</span></dt>
+                <dd>true oder false, je nach Zeitplan</dd>
+            </dl>
+        </li>
+    </ol>
+
+    <h3>Details</h3>
+    <p> Eine eingehende <code>msg.payload</code> wird als Zeitplan verwendet. Du 
+        kannst diese benutzen um einen bereits erstellten Zeitplan nach einem gewissen 
+        Event oder einfach nach einem Neustart zu laden. Wenn nichts per payload
+        eingepeist wird, oder diese Fehlerhaft ist, dann wird der Zeitplaner neu
+        initialsiert.
+    </p>
+    <p> Um einen neuen Zeitplan zu erstellen klicke rechts oben auf das Plus Symbol
+        (im Frontend/Dashboard).
+    </p>
+    <p> Die Eigenschaft <code>refresh</code> bestimmt wie oft ein Ausgang true oder 
+        false sendet (in Sekunden - Standard 60).
+    </p>
+    <p> Der Bereich <code>Geräte</code> muss mindestens ein Gerät beinhalten und bietet
+        die Möglichkeit viele weitere hinzuzufügen. Jedes Gerät erhält dann einen eigenen
+        Ausgang und eigene Zeitpläne im Dashboard.
+    </p>
+
+    <h3>Referenzen</h3>
+    <ul>
+        <li><a href="https://github.com/fellinga/node-red-contrib-ui-time-scheduler">GitHub</a> - das github repository des Nodes</li>
+    </ul>
+</script>

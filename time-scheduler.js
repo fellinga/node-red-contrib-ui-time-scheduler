@@ -28,8 +28,12 @@ module.exports = function(RED) {
 	function HTML(config) {
 		if (config.height == 0) config.height = 1;
 		if (config.name === "") config.name = "Time-Scheduler";
-		if (!config.refresh || config.refresh < 1) config.refresh = 60;
 		
+		// START needed for compatibility reasons < 0.3.0
+		if (!config.refresh) config.refresh = 60;
+		if (!config.devices) config.devices = [config.name];
+		// END needed for compatibility reasons < 0.3.0
+
 		const uniqueId = config.id.replace(".", "");
 		const divPrimary = "ui-ts-" + uniqueId;
 		var configAsJson = JSON.stringify(config);
@@ -69,8 +73,15 @@ module.exports = function(RED) {
 
 		var timerBody = String.raw`
 		<div id="` + divPrimary + `" ng-init='init(` + configAsJson + `)' style="height: ` + (40 + (config.height*125)) + `px;">
-			<div layout="row" layout-align="space-between center">
-				<span flex=""> ` + config.name + ` </span>
+			<div layout="row" layout-align="space-between center" style="max-height: 50px;">
+				<span flex="" ng-show="devices.length <= 1"> ` + config.devices[0] + ` </span>
+				<span flex="70" ng-show="devices.length > 1">
+					<md-input-container>
+						<md-select ng-model="myDeviceSelect" ng-change="showStandardView()" aria-label="Select device" ng-disabled="isEditMode">
+							<md-option ng-repeat="device in devices" value={{$index}}> {{devices[$index]}} </md-option>
+						</md-select>
+					</md-input-container>
+				</span>
 				<span flex="15">
 					<md-button id="addTimerBtn-` + uniqueId + `" style="width: 100%;" aria-label="Add" ng-click="toggleViews()"> </md-button>
 				</span>
@@ -79,21 +90,21 @@ module.exports = function(RED) {
 			<div id="timersView-` + uniqueId + `" style="margin-top: 4px;">
 				<table style="width: 100%; border-spacing: 0px;">
 				<tbody>
-					<tr ng-repeat-start="timer in timers track by $index" ng-click="showAddView($index)" class="timerhead-` + uniqueId + `">
+					<tr ng-repeat-start="timer in timers | filter:{ output: myDeviceSelect} track by $index" ng-click="showAddView(timers.indexOf(timer))" class="timerhead-` + uniqueId + `">
 						<th> # </th>
-						<th colspan="2"> Start </th>
-						<th colspan="2"> End </th>
-						<th colspan="2"> Runtime </th>
+						<th colspan="2">` + RED._("time-scheduler.ui.start") + `</th>
+						<th colspan="2">` + RED._("time-scheduler.ui.end") + `</th>
+						<th colspan="2">` + RED._("time-scheduler.ui.runtime") + `</th>
 					</tr>
-					<tr ng-click="showAddView($index)">
+					<tr ng-click="showAddView(timers.indexOf(timer))">
 						<td> {{$index+1}} </td>
 						<td colspan="2"> {{millisToTime(timer.starttime)}} </td>
 						<td colspan="2"> {{millisToTime(timer.endtime)}} </td>
 						<td colspan="2"> {{minutesToReadable(diff(timer.starttime,timer.endtime))}} </td>
 					</tr> 
-					<tr ng-click="showAddView($index)">
+					<tr ng-click="showAddView(timers.indexOf(timer))">
 						<td ng-repeat="day in days" ng-init="dayIndex=$index" style="width:14%;margin: 0 2%;"> 
-							<div class="weekDay-` + uniqueId + ` {{(timer.days[dayIndex]) ? 'weekDayActive-` + uniqueId + `' : ''}}"">
+							<div class="weekDay-` + uniqueId + ` {{utcDayToLocalDay(timer,dayIndex) ? 'weekDayActive-` + uniqueId + `' : ''}}"">
 								{{days[dayIndex]}}	
 							</div>
 						</td> 
@@ -106,28 +117,28 @@ module.exports = function(RED) {
 				<form ng-submit="addTimer()">
 					<div layout="row" style="max-height: 60px;">
 						<md-input-container flex="50">
-							<label style="color: #ffffff">Starttime</label>
+							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.starttime") + `</label>
 							<input id="timerStarttime-` + uniqueId + `" ng-model="timerStarttime" type="time" required>
 							<span class="validity"></span>
 						</md-input-container>
 						<md-input-container flex="50">
-							<label style="color: #ffffff">Endtime</label>
+							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.endtime") + `</label>
 							<input id="timerEndtime-` + uniqueId + `" ng-model="timerEndtime" type="time" required>
 							<span class="validity"></span>
 						</md-input-container>
 					</div>
-					<div layout="row" style="max-height: 60px;">
+					<div layout="row" style="max-height: 50px;">
 						<md-input-container>
-							<label style="color: #ffffff">Select active days</label>
-							<md-select multiple="true" placeholder="Select active days" ng-model="myMultipleSelect">
+							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.daysActive") + `</label>
+							<md-select multiple="true" placeholder="` + RED._("time-scheduler.ui.daysActive") + `" ng-model="myMultipleSelect">
 								<md-option ng-repeat="day in days" value={{$index}}> {{days[$index]}}  </md-option>
 							</md-select>
 						</md-input-container>
 					</div>
 					<div layout="row" layout-align="space-between end" style="height: 40px;">
-						<md-button ng-click="deleteTimer()" ng-show="hiddenTimerIndex !== undefined"> Delete </md-button>
+						<md-button ng-click="deleteTimer()" ng-show="hiddenTimerIndex !== undefined">` + RED._("time-scheduler.ui.delete") + `</md-button>
 						<span ng-show="hiddenTimerIndex === undefined"> </span>
-						<md-button type="submit"> Save </md-button>
+						<md-button type="submit">` + RED._("time-scheduler.ui.save") + `</md-button>
 					</div>
 				</form>
 			</div>
@@ -162,6 +173,14 @@ module.exports = function(RED) {
 			RED.nodes.createNode(this,config);
 			let node = this;
 			let nodeTimers = [];
+
+			this.nodeCallback = function nodeCallback(req, res) {
+				res.send(nodeTimers);
+			}
+
+			config.i18n = {	payloadWarning: RED._("time-scheduler.ui.payloadWarning"), 
+							nothingPlanned: RED._("time-scheduler.ui.nothingPlanned"), 
+							alertTimespan: RED._("time-scheduler.ui.alertTimespan")};
 			
 			if (checkConfig(config, node)) {
 				var done = ui.addWidget({
@@ -183,6 +202,7 @@ module.exports = function(RED) {
 								if (element.starttime === undefined || element.endtime === undefined || element.days === undefined) {
 									valid = false;
 								}
+								if (!element.output) element.output = 0;
 							});
 						} catch(e) {
 							valid = false;
@@ -197,52 +217,40 @@ module.exports = function(RED) {
 							msg.payload = [];
 						}
 
-						return {msg: msg};
+						return {msg: [msg]};
 					},
 					beforeSend: function (msg, orig) {
 						if (orig && orig.msg[0]) {
 							nodeTimers = orig.msg[0].payload;
-							orig.msg[0].payload = JSON.stringify({timers : orig.msg[0].payload});
-							orig.msg[1] = {payload: isInTime() };
-							return orig.msg;
+							const sendMsg = JSON.parse(JSON.stringify(orig.msg));
+							sendMsg[0].payload = JSON.stringify({timers : sendMsg[0].payload});
+							addOutputValues(sendMsg);
+							return sendMsg;
 						}
 					},
 					initController: function ($scope) {
 						$scope.init = function (config) {
-							$scope.timeschedulerid = config.id.replace(".", "");
+							$scope.i18n = config.i18n;
+							$scope.timeschedulerid = config.id;
 							$scope.days = ['SU','MO','TU','WE','TH','FR','SA'];
+							$scope.devices = config.devices;
+							$scope.myDeviceSelect = "0";
 						}
 
-						$scope.$watch('msg', function(msg) {
-							// msg after beforeEmit (noJSON) -> from input 
-							if (msg && msg.payload) {
-								$scope.timers = angular.copy(msg.payload);
-							// msg turnes into an array after hitting F5 or switching tabs
-							} else if (msg && msg[0] && msg[0].payload) {
-								// page refresh (F5) sends the msg object that was created after beforeSend (JSON)
-								// switching tabs sends the last known msg object (noJSON)
-								const data = angular.fromJson(msg[0].payload).timers;
-								if (data !== undefined) {
-									$scope.msg[0].payload = data;
-								}
-								// since the msg is an array now -> map back to single msg object
-								$scope.msg = $scope.msg[0];
-							// no payload received at all and timers not defined
-							} else if (!$scope.timers) {
-								$scope.msg = {payload : []};
-							}
+						$scope.$watch('msg', function() {
+							$scope.getTimersFromServer();
+						});
+
+						$scope.$watch('timers', function() {
 							$scope.showStandardView();
 						});
 
 						$scope.toggleViews = function() {
-							if ($scope.getElement("addTimerView").style.display === "block") {
-								$scope.showStandardView();
-							} else {
-								$scope.showAddView();
-							}
+							$scope.isEditMode ? $scope.showStandardView() : $scope.showAddView();
 						}
 
 						$scope.showStandardView = function() {
+							$scope.isEditMode = false;
 							$scope.getElement("addTimerBtn").innerHTML = "&#10010";
 							$scope.getElement("addTimerBtn").disabled = false;
 							$scope.getElement("timersView").style.display = "block";
@@ -255,17 +263,18 @@ module.exports = function(RED) {
 								
 								let msgBoard = $scope.getElement("messageBoard");
 								msgBoard.style.display = "block";
-								msgBoard.firstElementChild.innerHTML = "Invalid or no payload provided.";								
-							} else if ($scope.timers.length === 0) {
+								msgBoard.firstElementChild.innerHTML = $scope.i18n.payloadWarning;								
+							} else if ($scope.timers.filter(timer => timer.output == $scope.myDeviceSelect).length === 0) {
 								$scope.getElement("timersView").style.display = "none";
-
+								
 								let msgBoard = $scope.getElement("messageBoard");
 								msgBoard.style.display = "block";
-								msgBoard.firstElementChild.innerHTML = "Nothing planned yet. Click the plus sign to add a new timer.";
+								msgBoard.firstElementChild.innerHTML = $scope.i18n.nothingPlanned;
 							}
 						}
 
 						$scope.showAddView = function(timerIndex) {
+							$scope.isEditMode = true;
 							$scope.getElement("addTimerBtn").innerHTML = "X";
 							$scope.getElement("timersView").style.display = "none";
 							$scope.getElement("messageBoard").style.display = "none";
@@ -275,14 +284,16 @@ module.exports = function(RED) {
 							
 							if (timerIndex === undefined) {
 								const today = new Date();
-								$scope.timerStarttime = new Date(1970, 0, 1, today.getHours(), today.getMinutes()+1, 0);
-								$scope.timerEndtime = new Date(1970, 0, 1, today.getHours(), today.getMinutes()+6, 0);
+								if (today.getHours() == "23" && today.getMinutes() >= "54") today.setMinutes(53);
+								$scope.timerStarttime = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+1, 0);
+								$scope.timerEndtime = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+6, 0);
 								$scope.myMultipleSelect.push(today.getDay());
 							} else {
 								const timer = $scope.timers[timerIndex];						
 								$scope.timerStarttime = new Date(timer.starttime);
 								$scope.timerEndtime = new Date(timer.endtime);
 								for (let [index, val] of timer.days.entries()) {
+									val = $scope.utcDayToLocalDay(timer, index);
 									val === 1 ? $scope.myMultipleSelect.push(index) : "";
 								}
 							}
@@ -293,10 +304,7 @@ module.exports = function(RED) {
 							const endtime = $scope.timerEndtime.getTime();
 
 							if ($scope.diff(starttime, endtime) < 1) {
-								alert(	"Incorrect settings detected!" + '\n' +  
-										"- at least 1 minute" + '\n' + 
-										"- must not exceed midnight"  
-							  	);
+								alert($scope.i18n.alertTimespan);
 								return;
 							}
 
@@ -304,10 +312,15 @@ module.exports = function(RED) {
 								starttime: starttime,
 								endtime: endtime,
 								days : [0,0,0,0,0,0,0],
+								output : $scope.myDeviceSelect
 							};
 
+							const shift = $scope.timerStarttime.getUTCDay() - $scope.timerStarttime.getDay();
 							$scope.myMultipleSelect.forEach(day => {
-								timer.days[day] = 1;
+								let utcDay = Number(day)+shift;
+								if (utcDay < 0) utcDay = 6;
+								if (utcDay > 6) utcDay = 0;
+								timer.days[utcDay] = 1;
 							});
 
 							const timerIndex = $scope.hiddenTimerIndex;
@@ -329,8 +342,9 @@ module.exports = function(RED) {
 						}
 
 						$scope.sendTimersToOutput = function() {
-							$scope.msg.payload = angular.copy($scope.timers);
-							$scope.send([$scope.msg,null]);
+							if (!$scope.msg) $scope.msg = [{payload: ""}];
+							$scope.msg[0].payload = angular.copy($scope.timers);
+							$scope.send([$scope.msg[0]]);
 						}
 
 						$scope.minutesToReadable = function(minutes) {
@@ -339,6 +353,15 @@ module.exports = function(RED) {
 
 						$scope.millisToTime = function(millis) {
 							return $scope.padZero(new Date(millis).getHours()) + ":" + $scope.padZero(new Date(millis).getMinutes()); 
+						}
+
+						$scope.utcDayToLocalDay = function(timer, dayIndex) {
+							const start = new Date(timer.starttime);
+							const shift = start.getUTCDay() - start.getDay();
+							let utcDay = dayIndex+shift;
+							if (utcDay < 0) utcDay = 6;
+							if (utcDay > 6) utcDay = 0;
+							return timer.days[utcDay];
 						}
 
 						$scope.padZero = function(i) {
@@ -355,26 +378,58 @@ module.exports = function(RED) {
 						}
 
 						$scope.getElement = function(elementId) {
-							return document.querySelector("#" + elementId + "-" + $scope.timeschedulerid);
+							return document.querySelector("#" + elementId + "-" + $scope.timeschedulerid.replace(".", ""));
+						}
+
+						$scope.getTimersFromServer = function() {
+							$.ajax({
+								url: "time-scheduler/getNode/" + $scope.timeschedulerid,
+								dataType: 'json',
+								async: false,
+								success: function(json) {
+									$scope.timers = json;
+								}
+							});
 						}
 					}
 				});
 
 				var nodeInterval = setInterval(function() {
-					node.send([null, {payload: isInTime() }]);
+					let outputValues = [null];
+					addOutputValues(outputValues);
+					node.send(outputValues);
 				}, config.refresh * 1000);
 
-				function isInTime() {
+				function addOutputValues(myArray) {
+					for (let i = 0; i<config.devices.length; i++) {
+						myArray.push({payload: isInTime(i)});
+					}
+				}
+
+				function isInTime(device) {
 					let status = false;
 
 					if (nodeTimers.length > 0) {
-						const today = new Date();
-						const now = new Date(1970, 0, 1, today.getHours(), today.getMinutes(), 0).getTime();
+						const date = new Date();
 						
-						nodeTimers.forEach(function (timer) {
-							if (timer.days[today] === 0 || status) return;
+						nodeTimers.filter(timer => timer.output == device).forEach(function (timer) {		
+							if (status) return;
 
-							if (now >= timer.starttime && now < timer.endtime) {
+							const localStarttime = new Date(timer.starttime);
+							const localEndtime = new Date(timer.endtime);
+							
+							// CHECK IF UTC DAY
+							const shift = localStarttime.getUTCDay() - localStarttime.getDay();
+							let utcDay = shift + date.getDay();
+							if (utcDay < 0) utcDay = 6;
+							if (utcDay > 6) utcDay = 0;
+							if (timer.days[utcDay] === 0) return;
+
+							const compareDate = new Date(localStarttime);
+							compareDate.setHours(date.getHours());
+							compareDate.setMinutes(date.getMinutes());
+
+							if (compareDate.getTime() >= localStarttime.getTime() && compareDate.getTime() < localEndtime.getTime()) {
 								status = true;
 							}
 						});
@@ -397,4 +452,16 @@ module.exports = function(RED) {
 		}
     }
 	RED.nodes.registerType("ui_time_scheduler",TimeSchedulerNode);
+
+	const uiPath = ((RED.settings.ui || {}).path) || 'ui';
+	const nodePath = '/' + uiPath + '/time-scheduler/getNode/:nodeId';
+	RED.httpNode.get(nodePath, function(req, res) {
+		var nodeId = req.params.nodeId;
+		var node = RED.nodes.getNode(nodeId);
+		if (node) {
+			node.nodeCallback(req, res);
+		} else {
+			res.send(404).end();
+		}
+	});
 }

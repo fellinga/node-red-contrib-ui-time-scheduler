@@ -1,6 +1,28 @@
 {
     "time-scheduler" : {
         "payloadReceived": "Payload erhalten.",
-        "invalidPayload": "Ungültige Payload."
+        "invalidPayload": "Ungültige Payload.",
+        "label": {
+            "name": "Name",
+            "size": "Größe",
+            "group": "Gruppe",
+            "refresh": "Refresh",
+            "devices": "Geräte",
+            "device": "Gerät"
+        },
+        "copy": "Kopie",
+        "ui" : {
+            "start": "Start",
+            "starttime": "Start­zeit",
+            "end": "Ende",
+            "endtime": "Endzeit",
+            "runtime": "Laufzeit",
+            "daysActive": "Wähle aktive Tage",
+            "save": "Speichern",
+            "delete": "Löschen",
+            "payloadWarning": "Fehlerhafte oder keine Daten erhalten.",
+            "nothingPlanned": "Noch nichts geplant. Klicke auf das Plus Symbol um einen neuen Zeitplan zu erstellen.",
+            "alertTimespan": "Einstellungen fehlerhaft! \n - mindestens 1 Minute \n - nicht über Mitternacht" 
+        }
     }
 }

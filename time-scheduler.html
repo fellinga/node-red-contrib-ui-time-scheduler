@@ -24,21 +24,25 @@ SOFTWARE.
 
 <script type="text/x-red" data-template-name="ui_time_scheduler">
     <div class="form-row" id="template-row-group">
-       <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
+       <label for="node-input-group"><i class="fa fa-table"></i> <span data-i18n="time-scheduler.label.group"></span> </label>
        <input type="text" id="node-input-group">
     </div>
     <div class="form-row" id="template-row-size">
-        <label><i class="fa fa-object-group"></i> Size</label>
+        <label><i class="fa fa-object-group"></i> <span data-i18n="time-scheduler.label.size"></span> </label>
         <input type="hidden" id="node-input-width">
         <input type="hidden" id="node-input-height">
         <button class="editor-button" id="node-input-size"></button>
     </div>
     <div class="form-row">
-        <label for="node-input-refresh"><i class="fa fa-clock-o"></i> Refresh </label>
+        <label for="node-input-refresh"><i class="fa fa-clock-o"></i> <span data-i18n="time-scheduler.label.refresh"></span> </label>
         <input type="number" id="node-input-refresh" min="1"/>
     </div>
+    <label for="form-row node-input-device-container-row"><i class="fa fa-plug"></i> <span data-i18n="time-scheduler.label.devices"></span> </label>
+    <div class="form-row node-input-device-container-row">
+        <ol id="node-input-device-container"></ol>
+    </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="time-scheduler.label.name"></span> </label>
         <input type="text" id="node-input-name">
     </div>
 </script>
@@ -51,6 +55,8 @@ SOFTWARE.
             group: {type: 'ui_group', required:true},
             name: {value: ''},
             refresh: {value: 60},
+            devices: {value: ["Device 1"]},
+            outputs: {value: 2},
             order: {value: 0},
             width: {
                 value: 0,
@@ -71,13 +77,87 @@ SOFTWARE.
         paletteLabel: "ui scheduler",
         label: function() { return this.name || "ui scheduler"; },
         oneditprepare: function() {
+            var node = this;
+
             $("#node-input-size").elementSizer({
                 width: "#node-input-width",
                 height: "#node-input-height",
                 group: "#node-input-group"
             });
+
+            $("#node-input-device-container").css('min-height','222px').css('min-width','450px').editableList({
+                addItem: function(row, index, data) {
+                    const current = node._("time-scheduler.label.device") + " " + (index+1);
+                    
+                    var label = $('<span/>', {class:"node-input-device-label", text:" " + current});
+                    $(row).html(label);
+                    
+                    var nameInput = $('<input/>',{class:"node-input-device-name",type:"text",style:"margin-left: 5px;", value:data.name || current});
+                    nameInput.appendTo(row).typedInput({default:'str',types:['str']});
+
+                    var finalspan = $('<span/>',{style:"float: right;margin-top: 6px;"}).appendTo(row);
+                    finalspan.append(' &#8594; <span class="node-input-device-index">'+(index+1)+'</span> ');
+                },
+                removeItem: function(opt) {
+                    var devices = $("#node-input-device-container").editableList('items');
+                    devices.each(function(i) {
+                        $(this).find(".node-input-device-label").html(node._("time-scheduler.label.device") + " " + (i+1));
+                        var name = $(this).find(".node-input-device-name").typedInput('value');
+                        var regex = new RegExp("^" + node._("time-scheduler.label.device") + " \\d+$")
+                        if (regex.test(name)) {
+                            $(this).find(".node-input-device-name").typedInput('value', node._("time-scheduler.label.device") + " " + (i+1));
+                        }
+                        $(this).find(".node-input-device-index").html(i+1);
+                    });
+
+                    if (devices.length === 0) $("#node-input-device-container").editableList('addItem',{});
+                },
+                sortItems: function(rules) {
+                    var devices = $("#node-input-device-container").editableList('items');
+                    devices.each(function(i) {
+                        $(this).find(".node-input-device-label").html(node._("time-scheduler.label.device") + " " + (i+1));
+                        var name = $(this).find(".node-input-device-name").typedInput('value');
+                        var regex = new RegExp("^" + node._("time-scheduler.label.device") + " \\d+$")
+                        if (regex.test(name)) {
+                            $(this).find(".node-input-device-name").typedInput('value', node._("time-scheduler.label.device") + " " + (i+1));
+                        }
+                        $(this).find(".node-input-device-index").html(i+1);
+                    });
+                },
+                removable: true,
+                sortable: true
+            });
+
+            // START needed for compatibility reasons < 0.3.0
+            if (!this.refresh) $("#node-input-refresh").val(60);
+            if (!this.devices) $("#node-input-device-container").editableList('addItem',{name:this.name});
+            // END needed for compatibility reasons < 0.3.0
+
+            for (var i=0;i<this.devices.length;i++) {
+                $("#node-input-device-container").editableList('addItem',{name:this.devices[i]});
+            }
         },
         oneditsave: function() {
+            var node = this;
+            node.devices = [];
+            var devices = $("#node-input-device-container").editableList('items');
+
+            devices.each(function(i) {
+                var device = $(this);
+                var deviceName = device.find(".node-input-device-name").typedInput('value');
+                deviceName = deviceName === "" ? node._("time-scheduler.label.device") + " " + (i+1) : deviceName;
+                while (node.devices.includes(deviceName)) {
+                    deviceName = deviceName+"_"+node._("time-scheduler.copy");
+                }
+                node.devices.push(deviceName);
+            });
+
+            var numOfOutputs = devices.length > 1 ? devices.length : 1;
+            node.outputs = 1 + numOfOutputs;
+
+            let refresh = +($("#node-input-refresh").val());
+            refresh = refresh > 0 ? refresh : 60;
+            $("#node-input-refresh").val(refresh);
         },
         oneditresize: function(size) {
         }
