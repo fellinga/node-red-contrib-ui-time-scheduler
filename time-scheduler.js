@@ -356,8 +356,8 @@ module.exports = function(RED) {
 						}
 
 						$scope.utcDayToLocalDay = function(timer, dayIndex) {
-							const start = new Date(timer.starttime);
-							const shift = start.getUTCDay() - start.getDay();
+							const today = new Date();
+							const shift = today.getUTCDay() - today.getDay();
 							let utcDay = dayIndex+shift;
 							if (utcDay < 0) utcDay = 6;
 							if (utcDay > 6) utcDay = 0;
