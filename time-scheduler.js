@@ -469,7 +469,9 @@ module.exports = function(RED) {
 	RED.nodes.registerType("ui_time_scheduler",TimeSchedulerNode);
 
 	const uiPath = ((RED.settings.ui || {}).path) || 'ui';
-	const nodePath = '/' + uiPath + '/time-scheduler/getNode/:nodeId';
+	let nodePath = '/' + uiPath + '/time-scheduler/getNode/:nodeId';
+	nodePath = nodePath.replace(/\/+/g, '/');
+
 	RED.httpNode.get(nodePath, function(req, res) {
 		var nodeId = req.params.nodeId;
 		var node = RED.nodes.getNode(nodeId);
