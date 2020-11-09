@@ -104,7 +104,7 @@ module.exports = function(RED) {
 					</tr> 
 					<tr ng-click="showAddView(timers.indexOf(timer))">
 						<td ng-repeat="day in days" ng-init="dayIndex=$index" style="width:14%;margin: 0 2%;"> 
-							<div class="weekDay-` + uniqueId + ` {{utcDayToLocalDay(timer,dayIndex) ? 'weekDayActive-` + uniqueId + `' : ''}}"">
+							<div class="weekDay-` + uniqueId + ` {{(timer.days[localDayToUtc(timer,dayIndex)]) ? 'weekDayActive-` + uniqueId + `' : ''}}">
 								{{days[dayIndex]}}	
 							</div>
 						</td> 
@@ -292,16 +292,24 @@ module.exports = function(RED) {
 								const timer = $scope.timers[timerIndex];						
 								$scope.timerStarttime = new Date(timer.starttime);
 								$scope.timerEndtime = new Date(timer.endtime);
-								for (let [index, val] of timer.days.entries()) {
-									val = $scope.utcDayToLocalDay(timer, index);
-									val === 1 ? $scope.myMultipleSelect.push(index) : "";
+								for (let i = 0; i < timer.days.length; i++) {
+									if (timer.days[$scope.localDayToUtc(timer,i)]) $scope.myMultipleSelect.push(i);
 								}
 							}
 						}
 
 						$scope.addTimer = function() {
-							const starttime = $scope.timerStarttime.getTime();
-							const endtime = $scope.timerEndtime.getTime();
+							const start = new Date();
+							start.setHours($scope.timerStarttime.getHours());
+							start.setMinutes($scope.timerStarttime.getMinutes());
+							start.setSeconds(0); start.setMilliseconds(0); 
+							const starttime = start.getTime();
+
+							const end = new Date();
+							end.setHours($scope.timerEndtime.getHours());
+							end.setMinutes($scope.timerEndtime.getMinutes());
+							end.setSeconds(0); end.setMilliseconds(0); 
+							const endtime = end.getTime();
 
 							if ($scope.diff(starttime, endtime) < 1) {
 								alert($scope.i18n.alertTimespan);
@@ -314,12 +322,9 @@ module.exports = function(RED) {
 								days : [0,0,0,0,0,0,0],
 								output : $scope.myDeviceSelect
 							};
-
-							const shift = $scope.timerStarttime.getUTCDay() - $scope.timerStarttime.getDay();
+			
 							$scope.myMultipleSelect.forEach(day => {
-								let utcDay = Number(day)+shift;
-								if (utcDay < 0) utcDay = 6;
-								if (utcDay > 6) utcDay = 0;
+								const utcDay = $scope.localDayToUtc(timer, Number(day));
 								timer.days[utcDay] = 1;
 							});
 
@@ -355,13 +360,15 @@ module.exports = function(RED) {
 							return $scope.padZero(new Date(millis).getHours()) + ":" + $scope.padZero(new Date(millis).getMinutes()); 
 						}
 
-						$scope.utcDayToLocalDay = function(timer, dayIndex) {
-							const today = new Date();
-							const shift = today.getUTCDay() - today.getDay();
-							let utcDay = dayIndex+shift;
+						$scope.localDayToUtc = function(timer, localDay) {
+							const start = new Date(timer.starttime);
+							let shift = start.getUTCDay() - start.getDay();
+							if (shift < -1) shift = 1;
+							if (shift > 1) shift = -1;
+							let utcDay = shift + localDay;
 							if (utcDay < 0) utcDay = 6;
 							if (utcDay > 6) utcDay = 0;
-							return timer.days[utcDay];
+							return utcDay;
 						}
 
 						$scope.padZero = function(i) {
@@ -417,12 +424,9 @@ module.exports = function(RED) {
 
 							const localStarttime = new Date(timer.starttime);
 							const localEndtime = new Date(timer.endtime);
-							
-							// CHECK IF UTC DAY
-							const shift = localStarttime.getUTCDay() - localStarttime.getDay();
-							let utcDay = shift + date.getDay();
-							if (utcDay < 0) utcDay = 6;
-							if (utcDay > 6) utcDay = 0;
+
+							// CHECK UTC DAY
+							const utcDay = localDayToUtc(timer, date.getDay());
 							if (timer.days[utcDay] === 0) return;
 
 							const compareDate = new Date(localStarttime);
@@ -436,6 +440,17 @@ module.exports = function(RED) {
 					}
 
 					return status;
+				}
+
+				function localDayToUtc(timer, localDay) {
+					const start = new Date(timer.starttime);
+					let shift = start.getUTCDay() - start.getDay();
+					if (shift < -1) shift = 1;
+					if (shift > 1) shift = -1;
+					let utcDay = shift + localDay;
+					if (utcDay < 0) utcDay = 6;
+					if (utcDay > 6) utcDay = 0;
+					return utcDay;
 				}
 
 				node.on("close", function() {
