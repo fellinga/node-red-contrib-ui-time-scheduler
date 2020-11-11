@@ -12,7 +12,7 @@ Alternatively, run the following command in your Node-RED user directory - typic
 ## Usage
   
 Add a time-scheduler-node to your flow. Open the dashboard, you will see an empty scheduler.
-Click the plus sign at the top right corner of the node the create a new schedule.
+Click the plus sign at the top right corner of the node to create a new schedule.
   
 ### Input & Output
   
