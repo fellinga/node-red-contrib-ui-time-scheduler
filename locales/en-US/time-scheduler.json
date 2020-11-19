@@ -7,15 +7,18 @@
             "size": "Size",
             "group": "Group",
             "refresh": "Refresh",
+            "eventMode": "Event Mode",
             "devices": "Devices",
             "device": "Device"
         },
+        "eventModeDesc": "Schedule single events rather than a time span",
         "copy": "copy",
         "ui" : {
             "start": "Start",
             "starttime": "Starttime",
             "end": "End",
             "endtime": "Endtime",
+            "event": "Event",
             "runtime": "Runtime",
             "daysActive": "Select active days",
             "save": "Save",

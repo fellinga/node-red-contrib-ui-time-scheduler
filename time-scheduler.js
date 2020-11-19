@@ -36,9 +36,9 @@ module.exports = function(RED) {
 
 		const uniqueId = config.id.replace(".", "");
 		const divPrimary = "ui-ts-" + uniqueId;
-		var configAsJson = JSON.stringify(config);
+		const configAsJson = JSON.stringify(config);
 	
-		var styles = String.raw`
+		const styles = String.raw`
 		<style>
 			#` + divPrimary + ` {
 				padding-left: 6px;
@@ -71,7 +71,7 @@ module.exports = function(RED) {
 		</style>`
 		;
 
-		var timerBody = String.raw`
+		const timerBody = String.raw`
 		<div id="` + divPrimary + `" ng-init='init(` + configAsJson + `)' style="height: ` + (40 + (config.height*125)) + `px;">
 			<div layout="row" layout-align="space-between center" style="max-height: 50px;">
 				<span flex="" ng-show="devices.length <= 1"> ` + config.devices[0] + ` </span>
@@ -92,15 +92,25 @@ module.exports = function(RED) {
 				<tbody>
 					<tr ng-repeat-start="timer in timers | filter:{ output: myDeviceSelect} track by $index" ng-click="showAddView(timers.indexOf(timer))" class="timerhead-` + uniqueId + `">
 						<th> # </th>
+						${config.eventMode ? `
+						<th colspan="3">` + RED._("time-scheduler.ui.start") + `</th>
+						<th colspan="3">` + RED._("time-scheduler.ui.event") + `</th>
+						` : `
 						<th colspan="2">` + RED._("time-scheduler.ui.start") + `</th>
 						<th colspan="2">` + RED._("time-scheduler.ui.end") + `</th>
 						<th colspan="2">` + RED._("time-scheduler.ui.runtime") + `</th>
+						`}
 					</tr>
 					<tr ng-click="showAddView(timers.indexOf(timer))">
 						<td> {{$index+1}} </td>
+						${config.eventMode ? `
+						<td colspan="3"> {{millisToTime(timer.starttime)}} </td>
+						<td colspan="3"> {{timer.event ? "On" : "Off"}} </td>
+						` : `
 						<td colspan="2"> {{millisToTime(timer.starttime)}} </td>
 						<td colspan="2"> {{millisToTime(timer.endtime)}} </td>
 						<td colspan="2"> {{minutesToReadable(diff(timer.starttime,timer.endtime))}} </td>
+						`}
 					</tr> 
 					<tr ng-click="showAddView(timers.indexOf(timer))">
 						<td ng-repeat="day in days" ng-init="dayIndex=$index" style="width:14%;margin: 0 2%;"> 
@@ -121,11 +131,21 @@ module.exports = function(RED) {
 							<input id="timerStarttime-` + uniqueId + `" ng-model="timerStarttime" type="time" required>
 							<span class="validity"></span>
 						</md-input-container>
+						${config.eventMode ? `
+						<md-input-container flex="50">
+							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.event") + `</label>
+							<md-select ng-model="timerEvent">
+								<md-option ng-value=true selected> On </md-option>
+								<md-option ng-value=false > Off </md-option>
+							</md-select>
+						</md-input-container>
+						` : `
 						<md-input-container flex="50">
 							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.endtime") + `</label>
 							<input id="timerEndtime-` + uniqueId + `" ng-model="timerEndtime" type="time" required>
 							<span class="validity"></span>
 						</md-input-container>
+						`}
 					</div>
 					<div layout="row" style="max-height: 50px;">
 						<md-input-container>
@@ -145,7 +165,7 @@ module.exports = function(RED) {
 		</div>
 		`;
 
-		var html = String.raw`
+		const html = String.raw`
 		${styles}		
 		${timerBody}`
 		return html;
@@ -165,13 +185,13 @@ module.exports = function(RED) {
 
     function TimeSchedulerNode(config) {
 		try {
-			var ui = undefined;
+			let ui = undefined;
 			if(ui === undefined) {
 				ui = RED.require("node-red-dashboard")(RED);
 			}
 
 			RED.nodes.createNode(this,config);
-			let node = this;
+			const node = this;
 			let nodeTimers = [];
 
 			this.nodeCallback = function nodeCallback(req, res) {
@@ -183,7 +203,7 @@ module.exports = function(RED) {
 							alertTimespan: RED._("time-scheduler.ui.alertTimespan")};
 			
 			if (checkConfig(config, node)) {
-				var done = ui.addWidget({
+				const done = ui.addWidget({
 					node: node,
 					format: HTML(config),
 					templateScope: "local",
@@ -199,9 +219,16 @@ module.exports = function(RED) {
 						try {
 							msg.payload = JSON.parse(value).timers;
 							msg.payload.forEach(element => {
-								if (element.starttime === undefined || element.endtime === undefined || element.days === undefined) {
+								if (element.starttime === undefined || element.days === undefined) {
 									valid = false;
 								}
+
+								if (config.eventMode) {
+									if (element.event === undefined) valid = false;
+								} else {
+									if (element.endtime === undefined) valid = false;
+								}
+
 								if (!element.output) element.output = 0;
 							});
 						} catch(e) {
@@ -235,6 +262,7 @@ module.exports = function(RED) {
 							$scope.days = ['SU','MO','TU','WE','TH','FR','SA'];
 							$scope.devices = config.devices;
 							$scope.myDeviceSelect = "0";
+							$scope.eventMode = config.eventMode;
 						}
 
 						$scope.$watch('msg', function() {
@@ -261,13 +289,13 @@ module.exports = function(RED) {
 								$scope.getElement("timersView").style.display = "none";
 								$scope.getElement("addTimerBtn").disabled = true;
 								
-								let msgBoard = $scope.getElement("messageBoard");
+								const msgBoard = $scope.getElement("messageBoard");
 								msgBoard.style.display = "block";
 								msgBoard.firstElementChild.innerHTML = $scope.i18n.payloadWarning;								
 							} else if ($scope.timers.filter(timer => timer.output == $scope.myDeviceSelect).length === 0) {
 								$scope.getElement("timersView").style.display = "none";
 								
-								let msgBoard = $scope.getElement("messageBoard");
+								const msgBoard = $scope.getElement("messageBoard");
 								msgBoard.style.display = "block";
 								msgBoard.firstElementChild.innerHTML = $scope.i18n.nothingPlanned;
 							}
@@ -287,11 +315,13 @@ module.exports = function(RED) {
 								if (today.getHours() == "23" && today.getMinutes() >= "54") today.setMinutes(53);
 								$scope.timerStarttime = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+1, 0);
 								$scope.timerEndtime = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+6, 0);
+								$scope.timerEvent = true;
 								$scope.myMultipleSelect.push(today.getDay());
 							} else {
-								const timer = $scope.timers[timerIndex];						
+								const timer = $scope.timers[timerIndex];
 								$scope.timerStarttime = new Date(timer.starttime);
 								$scope.timerEndtime = new Date(timer.endtime);
+								$scope.timerEvent = timer.event;
 								for (let i = 0; i < timer.days.length; i++) {
 									if (timer.days[$scope.localDayToUtc(timer,i)]) $scope.myMultipleSelect.push(i);
 								}
@@ -305,23 +335,28 @@ module.exports = function(RED) {
 							start.setSeconds(0); start.setMilliseconds(0); 
 							const starttime = start.getTime();
 
-							const end = new Date();
-							end.setHours($scope.timerEndtime.getHours());
-							end.setMinutes($scope.timerEndtime.getMinutes());
-							end.setSeconds(0); end.setMilliseconds(0); 
-							const endtime = end.getTime();
-
-							if ($scope.diff(starttime, endtime) < 1) {
-								alert($scope.i18n.alertTimespan);
-								return;
-							}
-
 							const timer = {
 								starttime: starttime,
-								endtime: endtime,
 								days : [0,0,0,0,0,0,0],
 								output : $scope.myDeviceSelect
 							};
+
+							if ($scope.eventMode) {
+								timer.event = $scope.timerEvent;
+							} else {
+								const end = new Date();
+								end.setHours($scope.timerEndtime.getHours());
+								end.setMinutes($scope.timerEndtime.getMinutes());
+								end.setSeconds(0); end.setMilliseconds(0); 
+								const endtime = end.getTime();
+
+								if ($scope.diff(starttime, endtime) < 1) {
+									alert($scope.i18n.alertTimespan);
+									return;
+								}
+
+								timer.endtime = endtime;
+							}
 			
 							$scope.myMultipleSelect.forEach(day => {
 								const utcDay = $scope.localDayToUtc(timer, Number(day));
@@ -401,30 +436,29 @@ module.exports = function(RED) {
 					}
 				});
 
-				var nodeInterval = setInterval(function() {
-					let outputValues = [null];
+				const nodeInterval = setInterval(function() {
+					const outputValues = [null];
 					addOutputValues(outputValues);
 					node.send(outputValues);
 				}, config.refresh * 1000);
 
 				function addOutputValues(myArray) {
 					for (let i = 0; i<config.devices.length; i++) {
-						myArray.push({payload: isInTime(i)});
+						const value = isInTime(i);
+						value != null ? myArray.push({payload: value}) : myArray.push(null);
 					}
 				}
 
 				function isInTime(device) {
-					let status = false;
+					let status = null;
 
 					if (nodeTimers.length > 0) {
 						const date = new Date();
 						
 						nodeTimers.filter(timer => timer.output == device).forEach(function (timer) {		
-							if (status) return;
+							if (status != null) return;
 
 							const localStarttime = new Date(timer.starttime);
-							const localEndtime = new Date(timer.endtime);
-
 							// CHECK UTC DAY
 							const utcDay = localDayToUtc(timer, date.getDay());
 							if (timer.days[utcDay] === 0) return;
@@ -433,12 +467,20 @@ module.exports = function(RED) {
 							compareDate.setHours(date.getHours());
 							compareDate.setMinutes(date.getMinutes());
 
-							if (compareDate.getTime() >= localStarttime.getTime() && compareDate.getTime() < localEndtime.getTime()) {
-								status = true;
+							if (config.eventMode) {
+								if (compareDate.getTime() == localStarttime.getTime()) {
+									status = timer.event;
+								}
+							} else {
+								const localEndtime = new Date(timer.endtime);
+								if (compareDate.getTime() >= localStarttime.getTime() && compareDate.getTime() < localEndtime.getTime()) {
+									status = true;
+								}
 							}
 						});
 					}
 
+					if (!config.eventMode && status == null) status = false;
 					return status;
 				}
 
@@ -469,16 +511,11 @@ module.exports = function(RED) {
 	RED.nodes.registerType("ui_time_scheduler",TimeSchedulerNode);
 
 	const uiPath = ((RED.settings.ui || {}).path) || 'ui';
-	let nodePath = '/' + uiPath + '/time-scheduler/getNode/:nodeId';
-	nodePath = nodePath.replace(/\/+/g, '/');
+	const nodePath = '/' + uiPath + '/time-scheduler/getNode/:nodeId'.replace(/\/+/g, '/');
 
 	RED.httpNode.get(nodePath, function(req, res) {
-		var nodeId = req.params.nodeId;
-		var node = RED.nodes.getNode(nodeId);
-		if (node) {
-			node.nodeCallback(req, res);
-		} else {
-			res.send(404).end();
-		}
+		const nodeId = req.params.nodeId;
+		const node = RED.nodes.getNode(nodeId);
+		node ? node.nodeCallback(req, res) : res.send(404).end();
 	});
 }

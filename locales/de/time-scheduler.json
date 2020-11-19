@@ -7,15 +7,18 @@
             "size": "Größe",
             "group": "Gruppe",
             "refresh": "Refresh",
+            "eventMode": "Event Modus",
             "devices": "Geräte",
             "device": "Gerät"
         },
+        "eventModeDesc": "Erstelle einzelne Events anstatt eines Zeitplanes",
         "copy": "Kopie",
         "ui" : {
             "start": "Start",
             "starttime": "Start­zeit",
             "end": "Ende",
             "endtime": "Endzeit",
+            "event": "Ereignis",
             "runtime": "Laufzeit",
             "daysActive": "Wähle aktive Tage",
             "save": "Speichern",
