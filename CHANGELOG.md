@@ -1,6 +1,13 @@
 # Changelog
 
 ----------
+## [v0.4.0] - 2020-11-19
+
+### New
+- added new "event mode"! you can now
+  send single events at a specific time.
+
+----------
 ## [v0.3.3] - 2020-11-09
 
 ### Fixed

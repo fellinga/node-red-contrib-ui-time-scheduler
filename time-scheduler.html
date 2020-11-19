@@ -42,6 +42,11 @@ SOFTWARE.
         <ol id="node-input-device-container"></ol>
     </div>
     <div class="form-row">
+        <label for="node-input-eventMode"><i class="fa fa-unlink"></i> <span data-i18n="time-scheduler.label.eventMode"></span> </label>
+        <input type="checkbox" id="node-input-eventMode" style="display: inline-block; width: auto; vertical-align: top;">
+        <span data-i18n="time-scheduler.eventModeDesc"></span>
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="time-scheduler.label.name"></span> </label>
         <input type="text" id="node-input-name">
     </div>
@@ -56,15 +61,16 @@ SOFTWARE.
             name: {value: ''},
             refresh: {value: 60},
             devices: {value: ["Device 1"]},
+            eventMode: {value: false},
             outputs: {value: 2},
             order: {value: 0},
             width: {
                 value: 0,
                 validate: function(v) {
-                    var valid = true
-                    var width = v||0;
-                    var currentGroup = $('#node-input-group').val()|| this.group;
-                    var groupNode = RED.nodes.node(currentGroup);
+                    let valid = true
+                    const width = v||0;
+                    const currentGroup = $('#node-input-group').val()|| this.group;
+                    const groupNode = RED.nodes.node(currentGroup);
                     valid = !groupNode || +width <= +groupNode.width;
                     $("#node-input-size").toggleClass("input-error",!valid);
                     return valid;
@@ -77,7 +83,7 @@ SOFTWARE.
         paletteLabel: "ui scheduler",
         label: function() { return this.name || "ui scheduler"; },
         oneditprepare: function() {
-            var node = this;
+            const node = this;
 
             $("#node-input-size").elementSizer({
                 width: "#node-input-width",
@@ -85,25 +91,38 @@ SOFTWARE.
                 group: "#node-input-group"
             });
 
+            // START needed for compatibility reasons < 0.3.0
+            if (!this.refresh) $("#node-input-refresh").val(60);
+            if (!this.devices) $("#node-input-device-container").editableList('addItem',{name:this.name});
+            // END needed for compatibility reasons < 0.3.0
+
+            const checkRefresh = function() {
+                if ($("#node-input-refresh").val() < 0 || ($("#node-input-eventMode").prop("checked") && $("#node-input-refresh").val() > 60)) {
+                    $("#node-input-refresh").val(60);
+                }
+            }
+            $("#node-input-eventMode").on("change", checkRefresh);
+            $("#node-input-refresh").on("change", checkRefresh);
+
             $("#node-input-device-container").css('min-height','222px').css('min-width','450px').editableList({
                 addItem: function(row, index, data) {
                     const current = node._("time-scheduler.label.device") + " " + (index+1);
                     
-                    var label = $('<span/>', {class:"node-input-device-label", text:" " + current});
+                    const label = $('<span/>', {class:"node-input-device-label", text:" " + current});
                     $(row).html(label);
                     
-                    var nameInput = $('<input/>',{class:"node-input-device-name",type:"text",style:"margin-left: 5px;", value:data.name || current});
+                    const nameInput = $('<input/>',{class:"node-input-device-name",type:"text",style:"margin-left: 5px;", value:data.name || current});
                     nameInput.appendTo(row).typedInput({default:'str',types:['str']});
 
-                    var finalspan = $('<span/>',{style:"float: right;margin-top: 6px;"}).appendTo(row);
+                    const finalspan = $('<span/>',{style:"float: right;margin-top: 6px;"}).appendTo(row);
                     finalspan.append(' &#8594; <span class="node-input-device-index">'+(index+1)+'</span> ');
                 },
                 removeItem: function(opt) {
-                    var devices = $("#node-input-device-container").editableList('items');
+                    const devices = $("#node-input-device-container").editableList('items');
                     devices.each(function(i) {
                         $(this).find(".node-input-device-label").html(node._("time-scheduler.label.device") + " " + (i+1));
-                        var name = $(this).find(".node-input-device-name").typedInput('value');
-                        var regex = new RegExp("^" + node._("time-scheduler.label.device") + " \\d+$")
+                        const name = $(this).find(".node-input-device-name").typedInput('value');
+                        const regex = new RegExp("^" + node._("time-scheduler.label.device") + " \\d+$")
                         if (regex.test(name)) {
                             $(this).find(".node-input-device-name").typedInput('value', node._("time-scheduler.label.device") + " " + (i+1));
                         }
@@ -113,11 +132,11 @@ SOFTWARE.
                     if (devices.length === 0) $("#node-input-device-container").editableList('addItem',{});
                 },
                 sortItems: function(rules) {
-                    var devices = $("#node-input-device-container").editableList('items');
+                    const devices = $("#node-input-device-container").editableList('items');
                     devices.each(function(i) {
                         $(this).find(".node-input-device-label").html(node._("time-scheduler.label.device") + " " + (i+1));
-                        var name = $(this).find(".node-input-device-name").typedInput('value');
-                        var regex = new RegExp("^" + node._("time-scheduler.label.device") + " \\d+$")
+                        const name = $(this).find(".node-input-device-name").typedInput('value');
+                        const regex = new RegExp("^" + node._("time-scheduler.label.device") + " \\d+$")
                         if (regex.test(name)) {
                             $(this).find(".node-input-device-name").typedInput('value', node._("time-scheduler.label.device") + " " + (i+1));
                         }
@@ -128,23 +147,18 @@ SOFTWARE.
                 sortable: true
             });
 
-            // START needed for compatibility reasons < 0.3.0
-            if (!this.refresh) $("#node-input-refresh").val(60);
-            if (!this.devices) $("#node-input-device-container").editableList('addItem',{name:this.name});
-            // END needed for compatibility reasons < 0.3.0
-
-            for (var i=0;i<this.devices.length;i++) {
+            for (let i=0;i<this.devices.length;i++) {
                 $("#node-input-device-container").editableList('addItem',{name:this.devices[i]});
             }
         },
         oneditsave: function() {
-            var node = this;
+            const node = this;
             node.devices = [];
-            var devices = $("#node-input-device-container").editableList('items');
+            const devices = $("#node-input-device-container").editableList('items');
 
             devices.each(function(i) {
-                var device = $(this);
-                var deviceName = device.find(".node-input-device-name").typedInput('value');
+                const device = $(this);
+                let deviceName = device.find(".node-input-device-name").typedInput('value');
                 deviceName = deviceName === "" ? node._("time-scheduler.label.device") + " " + (i+1) : deviceName;
                 while (node.devices.includes(deviceName)) {
                     deviceName = deviceName+"_"+node._("time-scheduler.copy");
@@ -152,12 +166,7 @@ SOFTWARE.
                 node.devices.push(deviceName);
             });
 
-            var numOfOutputs = devices.length > 1 ? devices.length : 1;
-            node.outputs = 1 + numOfOutputs;
-
-            let refresh = +($("#node-input-refresh").val());
-            refresh = refresh > 0 ? refresh : 60;
-            $("#node-input-refresh").val(refresh);
+            node.outputs = 1 + devices.length;
         },
         oneditresize: function(size) {
         }

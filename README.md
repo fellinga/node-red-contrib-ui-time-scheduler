@@ -1,6 +1,9 @@
 # node-red-contrib-ui-time-scheduler
 A node-red-ui time scheduler for the Node-RED Dashboard.  
-![](images/time-scheduler.jpg)
+
+![](images/time-scheduler.jpg) | ![](images/time-scheduler-em.jpg)
+:--: | :--:
+*Default Mode* | *Event Mode*
 
 ## Install
   
@@ -16,16 +19,19 @@ Click the plus sign at the top right corner of the node to create a new schedule
   
 ### Input & Output
   
-Whenever you add or delete a schedule, the node sends a JSON string to its top output.  
-You can use such a string to directly inject timers after a (re)boot or (re)deploy.  
+Whenever you add or delete a schedule, the node sends a JSON string to its top output. You can use such a string to directly inject timers after a (re)boot or (re)deploy. 
 
-Every other output (number of total outputs depends on how many devices you added) emits true/false every 60 seconds and also whenever you modify the current schedule. Adjusting the refresh rate and the number of devices is possible within the node's options.
+Every other output (number of total outputs depends on how many devices you have added) emits true/false every 60 seconds. In Event Mode true/false is only sent at the specified time. Adjusting the refresh rate and the number of devices is possible within the node's options.
   
 ![](images/time-scheduler-flow.jpg)
+
+Tip: If you want to block values unless the value has changed, add a RBE node to the desired outout.
   
 ### Frontend & Demo
   
-![](images/time-scheduler-demo.gif)
+![](images/time-scheduler-demo.gif) |
+:--: |
+*Time Scheduler Demo (Default Mode)* |
 
 ## Examples
   
