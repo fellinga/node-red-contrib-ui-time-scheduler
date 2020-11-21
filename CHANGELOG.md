@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v0.4.1] - 2020-11-21
+
+### Fixed
+- properly detect ui url (again)
+
+----------
 ## [v0.4.0] - 2020-11-19
 
 ### New
