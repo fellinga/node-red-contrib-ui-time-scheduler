@@ -33,10 +33,6 @@ SOFTWARE.
         <input type="hidden" id="node-input-height">
         <button class="editor-button" id="node-input-size"></button>
     </div>
-    <div class="form-row">
-        <label for="node-input-refresh"><i class="fa fa-clock-o"></i> <span data-i18n="time-scheduler.label.refresh"></span> </label>
-        <input type="number" id="node-input-refresh" min="1"/>
-    </div>
     <label for="form-row node-input-device-container-row"><i class="fa fa-plug"></i> <span data-i18n="time-scheduler.label.devices"></span> </label>
     <div class="form-row node-input-device-container-row">
         <ol id="node-input-device-container"></ol>
@@ -45,6 +41,10 @@ SOFTWARE.
         <label for="node-input-eventMode"><i class="fa fa-unlink"></i> <span data-i18n="time-scheduler.label.eventMode"></span> </label>
         <input type="checkbox" id="node-input-eventMode" style="display: inline-block; width: auto; vertical-align: top;">
         <span data-i18n="time-scheduler.eventModeDesc"></span>
+    </div>
+    <div class="form-row">
+        <label for="node-input-refresh"><i class="fa fa-clock-o"></i> <span data-i18n="time-scheduler.label.refresh"></span> </label>
+        <input type="number" id="node-input-refresh" min="1" max="60"/>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="time-scheduler.label.name"></span> </label>
@@ -96,13 +96,11 @@ SOFTWARE.
             if (!this.devices) $("#node-input-device-container").editableList('addItem',{name:this.name});
             // END needed for compatibility reasons < 0.3.0
 
-            const checkRefresh = function() {
-                if ($("#node-input-refresh").val() < 0 || ($("#node-input-eventMode").prop("checked") && $("#node-input-refresh").val() > 60)) {
+            $("#node-input-refresh").on("change", function() {
+                if ($("#node-input-refresh").val() <= 0 || $("#node-input-refresh").val() > 60) {
                     $("#node-input-refresh").val(60);
                 }
-            }
-            $("#node-input-eventMode").on("change", checkRefresh);
-            $("#node-input-refresh").on("change", checkRefresh);
+            });
 
             $("#node-input-device-container").css('min-height','222px').css('min-width','450px').editableList({
                 addItem: function(row, index, data) {

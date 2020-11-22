@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v0.4.2] - 2020-11-22
+
+### Changed
+- improved timing (output messages)
+
+----------
 ## [v0.4.1] - 2020-11-21
 
 ### Fixed

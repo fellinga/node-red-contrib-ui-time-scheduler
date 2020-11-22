@@ -436,11 +436,22 @@ module.exports = function(RED) {
 					}
 				});
 
-				const nodeInterval = setInterval(function() {
+				let nodeInterval;
+				function createInitTimeout() {
+					const today = new Date();
+					const remaining = config.refresh - (today.getSeconds()%config.refresh);
+					setTimeout(function() {
+						nodeInterval = setInterval(intervalTimerFunction, config.refresh * 1000);
+						intervalTimerFunction();
+					}, (remaining*1000) - today.getMilliseconds());
+				}
+				createInitTimeout();
+
+				function intervalTimerFunction() {
 					const outputValues = [null];
 					addOutputValues(outputValues);
 					node.send(outputValues);
-				}, config.refresh * 1000);
+				}
 
 				function addOutputValues(myArray) {
 					for (let i = 0; i<config.devices.length; i++) {
