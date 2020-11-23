@@ -56,6 +56,8 @@ module.exports = function(RED) {
 			 }
 			.weekDay-` + uniqueId + ` {
 				width: 100%;
+				max-width: 40px;
+				display:inline-block;
 				line-height: 40px;
 				border-radius: 50%;
 				color: var(--nr-dashboard-widgetTextColor);
@@ -105,7 +107,7 @@ module.exports = function(RED) {
 						<td> {{$index+1}} </td>
 						${config.eventMode ? `
 						<td colspan="3"> {{millisToTime(timer.starttime)}} </td>
-						<td colspan="3"> {{timer.event ? "On" : "Off"}} </td>
+						<td colspan="3"> {{booleanToReadable(timer.event)}} </td>
 						` : `
 						<td colspan="2"> {{millisToTime(timer.starttime)}} </td>
 						<td colspan="2"> {{millisToTime(timer.endtime)}} </td>
@@ -132,13 +134,20 @@ module.exports = function(RED) {
 							<span class="validity"></span>
 						</md-input-container>
 						${config.eventMode ? `
+						${config.customPayload ? `
+						<md-input-container flex="50">
+							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.event") + `</label>
+							<input ng-model="timerEvent" required autocomplete="off">
+						</md-input-container>
+						` : `
 						<md-input-container flex="50">
 							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.event") + `</label>
 							<md-select ng-model="timerEvent">
-								<md-option ng-value=true selected> On </md-option>
-								<md-option ng-value=false > Off </md-option>
+								<md-option ng-value=true selected>` + RED._("time-scheduler.ui.on") + `</md-option>
+								<md-option ng-value=false >` + RED._("time-scheduler.ui.off") + `</md-option>
 							</md-select>
 						</md-input-container>
+						`}
 						` : `
 						<md-input-container flex="50">
 							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.endtime") + `</label>
@@ -200,7 +209,9 @@ module.exports = function(RED) {
 
 			config.i18n = {	payloadWarning: RED._("time-scheduler.ui.payloadWarning"), 
 							nothingPlanned: RED._("time-scheduler.ui.nothingPlanned"), 
-							alertTimespan: RED._("time-scheduler.ui.alertTimespan")};
+							alertTimespan: RED._("time-scheduler.ui.alertTimespan"),
+							on: RED._("time-scheduler.ui.on"),
+							off: RED._("time-scheduler.ui.off")};
 			
 			if (checkConfig(config, node)) {
 				const done = ui.addWidget({
@@ -329,11 +340,7 @@ module.exports = function(RED) {
 						}
 
 						$scope.addTimer = function() {
-							const start = new Date();
-							start.setHours($scope.timerStarttime.getHours());
-							start.setMinutes($scope.timerStarttime.getMinutes());
-							start.setSeconds(0); start.setMilliseconds(0); 
-							const starttime = start.getTime();
+							const starttime = $scope.getNowWithCustomTime($scope.timerStarttime.getTime());
 
 							const timer = {
 								starttime: starttime,
@@ -343,12 +350,15 @@ module.exports = function(RED) {
 
 							if ($scope.eventMode) {
 								timer.event = $scope.timerEvent;
+								if (timer.event === "true" || timer.event === true) {
+									timer.event = true;
+								} else if (timer.event === "false" || timer.event === false) {
+									timer.event = false;;
+								} else if (!isNaN(timer.event) && (timer.event+"").charAt(0) != "0") {
+									timer.event = Number(timer.event);
+								}
 							} else {
-								const end = new Date();
-								end.setHours($scope.timerEndtime.getHours());
-								end.setMinutes($scope.timerEndtime.getMinutes());
-								end.setSeconds(0); end.setMilliseconds(0); 
-								const endtime = end.getTime();
+								const endtime = $scope.getNowWithCustomTime($scope.timerEndtime.getTime());
 
 								if ($scope.diff(starttime, endtime) < 1) {
 									alert($scope.i18n.alertTimespan);
@@ -371,7 +381,9 @@ module.exports = function(RED) {
 							}
 
 							$scope.timers.sort(function(a, b) {
-								return a.starttime - b.starttime;
+								const millisA = $scope.getNowWithCustomTime(a.starttime);
+								const millisB = $scope.getNowWithCustomTime(b.starttime);
+								return millisA - millisB;
 							});
 							$scope.sendTimersToOutput();		
 						}
@@ -391,8 +403,23 @@ module.exports = function(RED) {
 							return (Math.floor(minutes/60) > 0 ? Math.floor(minutes/60) + "h " : "") + minutes%60 + "m";
 						}
 
+						$scope.booleanToReadable = function(e) {
+							if (e === 'true' || e === true) return $scope.i18n.on;
+							if (e === 'false' || e === false) return $scope.i18n.off;
+							return e;
+						}
+
 						$scope.millisToTime = function(millis) {
 							return $scope.padZero(new Date(millis).getHours()) + ":" + $scope.padZero(new Date(millis).getMinutes()); 
+						}
+
+						$scope.getNowWithCustomTime = function(timeInMillis) {
+							const date = new Date();
+							const origDate = new Date(timeInMillis);
+							date.setHours(origDate.getHours());
+							date.setMinutes(origDate.getMinutes());
+							date.setSeconds(0); date.setMilliseconds(0); 
+							return date.getTime();
 						}
 
 						$scope.localDayToUtc = function(timer, localDay) {

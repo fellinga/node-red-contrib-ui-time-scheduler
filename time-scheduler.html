@@ -42,6 +42,11 @@ SOFTWARE.
         <input type="checkbox" id="node-input-eventMode" style="display: inline-block; width: auto; vertical-align: top;">
         <span data-i18n="time-scheduler.eventModeDesc"></span>
     </div>
+    <div class="form-row" id="node-div-customPayload">
+        <label for="node-input-customPayload"><i class="fa fa-asterisk"></i> <span data-i18n="time-scheduler.label.customPayload"></span> </label>
+        <input type="checkbox" id="node-input-customPayload" style="display: inline-block; width: auto; vertical-align: top;">
+        <span data-i18n="time-scheduler.customPayloadDesc"></span>
+    </div>
     <div class="form-row">
         <label for="node-input-refresh"><i class="fa fa-clock-o"></i> <span data-i18n="time-scheduler.label.refresh"></span> </label>
         <input type="number" id="node-input-refresh" min="1" max="60"/>
@@ -61,6 +66,7 @@ SOFTWARE.
             name: {value: ''},
             refresh: {value: 60},
             devices: {value: ["Device 1"]},
+            customPayload: {value: false},
             eventMode: {value: false},
             outputs: {value: 2},
             order: {value: 0},
@@ -99,6 +105,15 @@ SOFTWARE.
             $("#node-input-refresh").on("change", function() {
                 if ($("#node-input-refresh").val() <= 0 || $("#node-input-refresh").val() > 60) {
                     $("#node-input-refresh").val(60);
+                }
+            });
+
+            $("#node-input-eventMode").on("change", function() {
+                if ($("#node-input-eventMode").prop("checked")) {
+                    $("#node-div-customPayload").show();
+                } else {
+                    $("#node-input-customPayload").prop("checked", false);
+                    $("#node-div-customPayload").hide();
                 }
             });
 
