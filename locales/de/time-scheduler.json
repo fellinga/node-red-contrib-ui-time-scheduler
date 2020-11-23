@@ -7,10 +7,12 @@
             "size": "Größe",
             "group": "Gruppe",
             "refresh": "Refresh",
+            "customPayload" : "Payload",
             "eventMode": "Event Modus",
             "devices": "Geräte",
             "device": "Gerät"
         },
+        "customPayloadDesc": "Aktzeptiere individuelle Payload eingaben",
         "eventModeDesc": "Erstelle einzelne Events anstatt eines Zeitplanes",
         "copy": "Kopie",
         "ui" : {
@@ -23,6 +25,8 @@
             "daysActive": "Wähle aktive Tage",
             "save": "Speichern",
             "delete": "Löschen",
+            "on": "Ein",
+            "off": "Aus",
             "payloadWarning": "Fehlerhafte oder keine Daten erhalten.",
             "nothingPlanned": "Noch nichts geplant. Klicke auf das Plus Symbol um einen neuen Zeitplan zu erstellen.",
             "alertTimespan": "Einstellungen fehlerhaft! \n - mindestens 1 Minute \n - nicht über Mitternacht" 

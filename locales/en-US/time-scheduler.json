@@ -7,10 +7,12 @@
             "size": "Size",
             "group": "Group",
             "refresh": "Refresh",
+            "customPayload" : "Payload",
             "eventMode": "Event Mode",
             "devices": "Devices",
             "device": "Device"
         },
+        "customPayloadDesc": "Accept custom payloads",
         "eventModeDesc": "Schedule single events rather than a time span",
         "copy": "copy",
         "ui" : {
@@ -23,6 +25,8 @@
             "daysActive": "Select active days",
             "save": "Save",
             "delete": "delete",
+            "on": "On",
+            "off": "Off",
             "payloadWarning": "Invalid or no payload provided.",
             "nothingPlanned": "Nothing planned yet. Click the plus sign to add a new timer.",
             "alertTimespan": "Incorrect settings detected! \n - at least 1 minute \n - must not exceed midnight"

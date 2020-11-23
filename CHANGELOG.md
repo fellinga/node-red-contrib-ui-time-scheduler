@@ -1,6 +1,13 @@
 # Changelog
 
 ----------
+## [v0.4.3] - 2020-11-23
+
+### New
+- event mode now has the ability to send
+  custom payloads
+  
+----------
 ## [v0.4.2] - 2020-11-22
 
 ### Changed
