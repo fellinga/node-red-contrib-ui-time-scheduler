@@ -53,7 +53,15 @@ module.exports = function(RED) {
 			}
 			#` + divPrimary + ` md-input-container {
 				width: 100%;
-			 }
+			}
+			#` + divPrimary + ` md-select md-select-value {
+				color: var(--nr-dashboard-widgetTextColor);
+				border-color: var(--nr-dashboard-widgetBackgroundColor);
+			}
+			#` + divPrimary + ` md-select[disabled] md-select-value {
+				color: var(--nr-dashboard-widgetTextColor);
+				opacity: 0.7;
+			}
 			.weekDay-` + uniqueId + ` {
 				width: 100%;
 				max-width: 40px;
@@ -67,7 +75,7 @@ module.exports = function(RED) {
 			.weekDayActive-` + uniqueId + ` {
 				opacity: 1;
 			}
-			.timerhead-` + uniqueId + ` {
+			.timerhead-` + uniqueId + `, #` + divPrimary + ` .md-button {
 				background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
 			}
 		</style>`
@@ -76,16 +84,16 @@ module.exports = function(RED) {
 		const timerBody = String.raw`
 		<div id="` + divPrimary + `" ng-init='init(` + configAsJson + `)' style="height: ` + (40 + (config.height*125)) + `px;">
 			<div layout="row" layout-align="space-between center" style="max-height: 50px;">
-				<span flex="" ng-show="devices.length <= 1"> ` + config.devices[0] + ` </span>
+				<span flex="70" ng-show="devices.length <= 1"> ` + config.devices[0] + ` </span>
 				<span flex="70" ng-show="devices.length > 1">
 					<md-input-container>
-						<md-select ng-model="myDeviceSelect" ng-change="showStandardView()" aria-label="Select device" ng-disabled="isEditMode">
+						<md-select class="nr-dashboard-dropdown" ng-model="myDeviceSelect" ng-change="showStandardView()" aria-label="Select device" ng-disabled="isEditMode">
 							<md-option ng-repeat="device in devices" value={{$index}}> {{devices[$index]}} </md-option>
 						</md-select>
 					</md-input-container>
 				</span>
-				<span flex="15">
-					<md-button id="addTimerBtn-` + uniqueId + `" style="width: 100%;" aria-label="Add" ng-click="toggleViews()"> </md-button>
+				<span flex="30" layout="row" layout-align="end center">
+					<md-button id="addTimerBtn-` + uniqueId + `" style="width: 50px; height: 36px; margin: 0;" aria-label="Add" ng-click="toggleViews()"> </md-button>
 				</span>
 			</div>
 			<div id="messageBoard-` + uniqueId + `" style="display:none;"> <p> </p> </div>
@@ -142,7 +150,7 @@ module.exports = function(RED) {
 						` : `
 						<md-input-container flex="50">
 							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.event") + `</label>
-							<md-select ng-model="timerEvent">
+							<md-select class="nr-dashboard-dropdown" ng-model="timerEvent">
 								<md-option ng-value=true selected>` + RED._("time-scheduler.ui.on") + `</md-option>
 								<md-option ng-value=false >` + RED._("time-scheduler.ui.off") + `</md-option>
 							</md-select>
@@ -159,15 +167,15 @@ module.exports = function(RED) {
 					<div layout="row" style="max-height: 50px;">
 						<md-input-container>
 							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.daysActive") + `</label>
-							<md-select multiple="true" placeholder="` + RED._("time-scheduler.ui.daysActive") + `" ng-model="myMultipleSelect">
+							<md-select class="nr-dashboard-dropdown" multiple="true" placeholder="` + RED._("time-scheduler.ui.daysActive") + `" ng-model="myMultipleSelect">
 								<md-option ng-repeat="day in days" value={{$index}}> {{days[$index]}}  </md-option>
 							</md-select>
 						</md-input-container>
 					</div>
 					<div layout="row" layout-align="space-between end" style="height: 40px;">
-						<md-button ng-click="deleteTimer()" ng-show="hiddenTimerIndex !== undefined">` + RED._("time-scheduler.ui.delete") + `</md-button>
+						<md-button style="margin: 1px" ng-click="deleteTimer()" ng-show="hiddenTimerIndex !== undefined">` + RED._("time-scheduler.ui.delete") + `</md-button>
 						<span ng-show="hiddenTimerIndex === undefined"> </span>
-						<md-button type="submit">` + RED._("time-scheduler.ui.save") + `</md-button>
+						<md-button style="margin: 1px" type="submit">` + RED._("time-scheduler.ui.save") + `</md-button>
 					</div>
 				</form>
 			</div>
