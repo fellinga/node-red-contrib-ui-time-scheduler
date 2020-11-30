@@ -31,7 +31,7 @@ module.exports = function(RED) {
 		
 		// START needed for compatibility reasons < 0.3.0
 		if (!config.refresh) config.refresh = 60;
-		if (!config.devices) config.devices = [config.name];
+		if (!config.devices || config.device.length === 0) config.devices = [config.name];
 		// END needed for compatibility reasons < 0.3.0
 
 		const uniqueId = config.id.replace(".", "");

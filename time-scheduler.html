@@ -97,11 +97,6 @@ SOFTWARE.
                 group: "#node-input-group"
             });
 
-            // START needed for compatibility reasons < 0.3.0
-            if (!this.refresh) $("#node-input-refresh").val(60);
-            if (!this.devices) $("#node-input-device-container").editableList('addItem',{name:this.name});
-            // END needed for compatibility reasons < 0.3.0
-
             $("#node-input-refresh").on("change", function() {
                 if ($("#node-input-refresh").val() <= 0 || $("#node-input-refresh").val() > 60) {
                     $("#node-input-refresh").val(60);
@@ -160,8 +155,13 @@ SOFTWARE.
                 sortable: true
             });
 
-            for (let i=0;i<this.devices.length;i++) {
-                $("#node-input-device-container").editableList('addItem',{name:this.devices[i]});
+            if (!this.refresh) $("#node-input-refresh").val(60);
+            if (!this.devices) {
+                $("#node-input-device-container").editableList('addItem',{name:this.name});
+            } else {
+                for (let i=0;i<this.devices.length;i++) {
+                    $("#node-input-device-container").editableList('addItem',{name:this.devices[i]});
+                }
             }
         },
         oneditsave: function() {
