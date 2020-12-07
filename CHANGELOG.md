@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v0.4.6] - 2020-12-07
+
+### New
+- you can now change the first day of the week
+  
+----------
 ## [v0.4.5] - 2020-11-30
 
 ### Fixed

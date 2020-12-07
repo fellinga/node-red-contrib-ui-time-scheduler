@@ -26,17 +26,8 @@ module.exports = function(RED) {
 	'use strict';
 
 	function HTML(config) {
-		if (config.height == 0) config.height = 1;
-		if (config.name === "") config.name = "Time-Scheduler";
-		
-		// START needed for compatibility reasons < 0.3.0
-		if (!config.refresh) config.refresh = 60;
-		if (!config.devices || config.devices.length === 0) config.devices = [config.name];
-		// END needed for compatibility reasons < 0.3.0
-
 		const uniqueId = config.id.replace(".", "");
 		const divPrimary = "ui-ts-" + uniqueId;
-		const configAsJson = JSON.stringify(config);
 	
 		const styles = String.raw`
 		<style>
@@ -56,7 +47,7 @@ module.exports = function(RED) {
 			}
 			#` + divPrimary + ` md-select md-select-value {
 				color: var(--nr-dashboard-widgetTextColor);
-				border-color: var(--nr-dashboard-widgetBackgroundColor);
+				border-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
 			}
 			#` + divPrimary + ` md-select[disabled] md-select-value {
 				color: var(--nr-dashboard-widgetTextColor);
@@ -82,9 +73,9 @@ module.exports = function(RED) {
 		;
 
 		const timerBody = String.raw`
-		<div id="` + divPrimary + `" ng-init='init(` + configAsJson + `)' style="height: ` + (40 + (config.height*125)) + `px;">
+		<div id="` + divPrimary + `" ng-init='init(` + JSON.stringify(config) + `)' style="height: ` + (40 + (config.height*125)) + `px;">
 			<div layout="row" layout-align="space-between center" style="max-height: 50px;">
-				<span flex="70" ng-show="devices.length <= 1"> ` + config.devices[0] + ` </span>
+				<span flex="70" ng-show="devices.length <= 1" style="height:50px; line-height: 50px;"> ` + config.devices[0] + ` </span>
 				<span flex="70" ng-show="devices.length > 1">
 					<md-input-container>
 						<md-select class="nr-dashboard-dropdown" ng-model="myDeviceSelect" ng-change="showStandardView()" aria-label="Select device" ng-disabled="isEditMode">
@@ -121,9 +112,14 @@ module.exports = function(RED) {
 						<td colspan="2"> {{millisToTime(timer.endtime)}} </td>
 						<td colspan="2"> {{minutesToReadable(diff(timer.starttime,timer.endtime))}} </td>
 						`}
-					</tr> 
+					</tr>
 					<tr ng-click="showAddView(timers.indexOf(timer))">
-						<td ng-repeat="day in days" ng-init="dayIndex=$index" style="width:14%;margin: 0 2%;"> 
+						<td ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="dayIndex=$index+${config.startDay}" style="width:14%;margin: 0 2%;"> 
+							<div class="weekDay-` + uniqueId + ` {{(timer.days[localDayToUtc(timer,dayIndex)]) ? 'weekDayActive-` + uniqueId + `' : ''}}">
+								{{days[dayIndex]}}	
+							</div>
+						</td>
+						<td ng-repeat="day in days | limitTo : -${config.startDay}" ng-init="dayIndex=$index" style="width:14%;margin: 0 2%;"> 
 							<div class="weekDay-` + uniqueId + ` {{(timer.days[localDayToUtc(timer,dayIndex)]) ? 'weekDayActive-` + uniqueId + `' : ''}}">
 								{{days[dayIndex]}}	
 							</div>
@@ -157,7 +153,7 @@ module.exports = function(RED) {
 						</md-input-container>
 						`}
 						` : `
-						<md-input-container flex="50">
+						<md-input-container flex="45">
 							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.endtime") + `</label>
 							<input id="timerEndtime-` + uniqueId + `" ng-model="timerEndtime" type="time" required>
 							<span class="validity"></span>
@@ -168,7 +164,8 @@ module.exports = function(RED) {
 						<md-input-container>
 							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.daysActive") + `</label>
 							<md-select class="nr-dashboard-dropdown" multiple="true" placeholder="` + RED._("time-scheduler.ui.daysActive") + `" ng-model="myMultipleSelect">
-								<md-option ng-repeat="day in days" value={{$index}}> {{days[$index]}}  </md-option>
+								<md-option ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="$index=$index+${config.startDay}" value={{$index}}> {{days[$index]}}  </md-option>
+								<md-option ng-repeat="day in days | limitTo : -${config.startDay}" value={{$index}}> {{days[$index]}}  </md-option>
 							</md-select>
 						</md-input-container>
 					</div>
@@ -215,9 +212,17 @@ module.exports = function(RED) {
 				res.send(nodeTimers);
 			}
 
+			// START check props
+			if (!config.hasOwnProperty("refresh")) config.refresh = 60;
+			if (!config.hasOwnProperty("startDay")) config.startDay = 0;
+			if (!config.hasOwnProperty("height") || config.height == 0) config.height = 1;
+			if (!config.hasOwnProperty("name") || config.name === "") config.name = "Time-Scheduler";
+			if (!config.hasOwnProperty("devices") || config.devices.length === 0) config.devices = [config.name];
+			// END check props
 			config.i18n = {	payloadWarning: RED._("time-scheduler.ui.payloadWarning"), 
 							nothingPlanned: RED._("time-scheduler.ui.nothingPlanned"), 
 							alertTimespan: RED._("time-scheduler.ui.alertTimespan"),
+							days: RED._("time-scheduler.ui.days", { returnObjects: true }),
 							on: RED._("time-scheduler.ui.on"),
 							off: RED._("time-scheduler.ui.off")};
 			
@@ -277,8 +282,8 @@ module.exports = function(RED) {
 					initController: function ($scope) {
 						$scope.init = function (config) {
 							$scope.i18n = config.i18n;
+							$scope.days = config.i18n.days;
 							$scope.timeschedulerid = config.id;
-							$scope.days = ['SU','MO','TU','WE','TH','FR','SA'];
 							$scope.devices = config.devices;
 							$scope.myDeviceSelect = "0";
 							$scope.eventMode = config.eventMode;

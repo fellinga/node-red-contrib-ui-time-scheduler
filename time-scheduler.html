@@ -48,6 +48,18 @@ SOFTWARE.
         <span data-i18n="time-scheduler.customPayloadDesc"></span>
     </div>
     <div class="form-row">
+        <label for="node-input-startDay"><i class="fa fa-calendar"></i> <span data-i18n="time-scheduler.label.startDay"></span> </label>
+        <select id="node-input-startDay" style="width:156px;">
+            <option value="0" data-i18n="time-scheduler.days.0"> </option>
+            <option value="1" data-i18n="time-scheduler.days.1"> </option>
+            <option value="2" data-i18n="time-scheduler.days.2"> </option>
+            <option value="3" data-i18n="time-scheduler.days.3"> </option>
+            <option value="4" data-i18n="time-scheduler.days.4"> </option>
+            <option value="5" data-i18n="time-scheduler.days.5"> </option>
+            <option value="6" data-i18n="time-scheduler.days.6"> </option>
+        </select>
+    </div>
+    <div class="form-row">
         <label for="node-input-refresh"><i class="fa fa-clock-o"></i> <span data-i18n="time-scheduler.label.refresh"></span> </label>
         <input type="number" id="node-input-refresh" min="1" max="60"/>
     </div>
@@ -64,6 +76,7 @@ SOFTWARE.
         defaults: {
             group: {type: 'ui_group', required:true},
             name: {value: ''},
+            startDay: {value: 0},
             refresh: {value: 60},
             devices: {value: ["Device 1"]},
             customPayload: {value: false},
@@ -155,6 +168,7 @@ SOFTWARE.
                 sortable: true
             });
 
+            if (!this.startDay) $("#node-input-startDay").val(0).change();
             if (!this.refresh) $("#node-input-refresh").val(60);
             if (!this.devices) {
                 $("#node-input-device-container").editableList('addItem',{name:this.name});
