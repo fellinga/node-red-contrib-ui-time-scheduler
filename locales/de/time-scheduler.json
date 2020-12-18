@@ -14,7 +14,7 @@
             "device": "Gerät"
         },
         "days": ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"],
-        "customPayloadDesc": "Aktzeptiere individuelle Payload eingaben",
+        "customPayloadDesc": "Akzeptiere Freitexteingaben für Events",
         "eventModeDesc": "Erstelle einzelne Events anstatt eines Zeitplanes",
         "copy": "Kopie",
         "ui" : {
@@ -23,7 +23,8 @@
             "end": "Ende",
             "endtime": "Endzeit",
             "event": "Ereignis",
-            "runtime": "Laufzeit",
+            "duration": "Dauer",
+            "overview": "Übersicht",
             "days": ["SO","MO","DI","MI","DO","FR","SA"],
             "daysActive": "Wähle aktive Tage",
             "save": "Speichern",
