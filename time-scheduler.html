@@ -59,7 +59,7 @@ SOFTWARE.
             <option value="6" data-i18n="time-scheduler.days.6"> </option>
         </select>
     </div>
-    <div class="form-row">
+    <div class="form-row" id="node-div-refresh">
         <label for="node-input-refresh"><i class="fa fa-clock-o"></i> <span data-i18n="time-scheduler.label.refresh"></span> </label>
         <input type="number" id="node-input-refresh" min="1" max="60"/>
     </div>
@@ -119,9 +119,12 @@ SOFTWARE.
             $("#node-input-eventMode").on("change", function() {
                 if ($("#node-input-eventMode").prop("checked")) {
                     $("#node-div-customPayload").show();
+                    $("#node-input-refresh").val(60);
+                    $("#node-div-refresh").hide();
                 } else {
                     $("#node-input-customPayload").prop("checked", false);
                     $("#node-div-customPayload").hide();
+                    $("#node-div-refresh").show();
                 }
             });
 

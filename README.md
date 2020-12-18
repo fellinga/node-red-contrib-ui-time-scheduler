@@ -11,6 +11,10 @@ You can install this node directly from the "Manage Palette" menu in the Node-RE
 Alternatively, run the following command in your Node-RED user directory - typically `~/.node-red` on Linux or `%HOMEPATH%\.nodered` on Windows
 
         npm install node-red-contrib-ui-time-scheduler
+
+### Requirements ###
+node-red v0.19 or above  
+node-red-dashboard v2.10.0 (v2.15.4 or above would be ideal)
   
 ## Usage
   

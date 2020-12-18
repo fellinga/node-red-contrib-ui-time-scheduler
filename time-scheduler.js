@@ -38,6 +38,7 @@ module.exports = function(RED) {
 			#` + divPrimary + ` tr {
 				height: 36px;
 				text-align: center;
+				cursor: pointer;
 			}
 			#` + divPrimary + ` tr:focus {
 				outline: 0;
@@ -79,6 +80,7 @@ module.exports = function(RED) {
 				<span flex="70" ng-show="devices.length > 1">
 					<md-input-container>
 						<md-select class="nr-dashboard-dropdown" ng-model="myDeviceSelect" ng-change="showStandardView()" aria-label="Select device" ng-disabled="isEditMode">
+							<md-option value="overview">` + RED._("time-scheduler.ui.overview") + `</md-option>
 							<md-option ng-repeat="device in devices" value={{$index}}> {{devices[$index]}} </md-option>
 						</md-select>
 					</md-input-container>
@@ -88,6 +90,24 @@ module.exports = function(RED) {
 				</span>
 			</div>
 			<div id="messageBoard-` + uniqueId + `" style="display:none;"> <p> </p> </div>
+			<div id="overview-` + uniqueId + `" style="display:none; overflow:hidden">
+				<div ng-repeat="device in devices track by $index">
+					<h4> {{devices[$index]}} </h4>
+					<span ng-repeat="timer in filteredValues = (timers | filter:{ output: $index})" style="white-space: nowrap">
+						<span style="float:left; max-width: 100px;">
+							{{millisToTime(timer.starttime)}}-${config.eventMode ? `{{booleanToReadable(timer.event)}}` : `{{millisToTime(timer.endtime)}}`}
+						</span>
+						<br ng-if="(timer.hasOwnProperty('event') && timer.event.length > 7)">
+						<span style="float:right;">
+							<span ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="dayIndex=$index+${config.startDay}">{{timer.days[dayIndex]===1 ? days[dayIndex]+"&nbsp;" : ""}}</span>
+							<span ng-repeat="day in days | limitTo : -${config.startDay}" ng-init="dayIndex=$index">{{timer.days[dayIndex]===1 ? days[dayIndex]+"&nbsp;" : ""}}</span>
+						</span>
+						<br>
+					</span>
+					<span ng-if="!filteredValues.length">------</span>
+					<hr>
+				</div>
+			</div>
 			<div id="timersView-` + uniqueId + `" style="margin-top: 4px;">
 				<table style="width: 100%; border-spacing: 0px;">
 				<tbody>
@@ -99,7 +119,7 @@ module.exports = function(RED) {
 						` : `
 						<th colspan="2">` + RED._("time-scheduler.ui.start") + `</th>
 						<th colspan="2">` + RED._("time-scheduler.ui.end") + `</th>
-						<th colspan="2">` + RED._("time-scheduler.ui.runtime") + `</th>
+						<th colspan="2">` + RED._("time-scheduler.ui.duration") + `</th>
 						`}
 					</tr>
 					<tr ng-click="showAddView(timers.indexOf(timer))">
@@ -271,6 +291,7 @@ module.exports = function(RED) {
 						return {msg: [msg]};
 					},
 					beforeSend: function (msg, orig) {
+						node.status({});
 						if (orig && orig.msg[0]) {
 							nodeTimers = orig.msg[0].payload;
 							const sendMsg = JSON.parse(JSON.stringify(orig.msg));
@@ -285,7 +306,7 @@ module.exports = function(RED) {
 							$scope.days = config.i18n.days;
 							$scope.timeschedulerid = config.id;
 							$scope.devices = config.devices;
-							$scope.myDeviceSelect = "0";
+							$scope.myDeviceSelect = $scope.devices.length > 1 ? "overview" : "0";
 							$scope.eventMode = config.eventMode;
 						}
 
@@ -307,6 +328,7 @@ module.exports = function(RED) {
 							$scope.getElement("addTimerBtn").disabled = false;
 							$scope.getElement("timersView").style.display = "block";
 							$scope.getElement("messageBoard").style.display = "none";
+							$scope.getElement("overview").style.display = "none";
 							$scope.getElement("addTimerView").style.display = "none";
 
 							if (!$scope.timers) {
@@ -315,7 +337,11 @@ module.exports = function(RED) {
 								
 								const msgBoard = $scope.getElement("messageBoard");
 								msgBoard.style.display = "block";
-								msgBoard.firstElementChild.innerHTML = $scope.i18n.payloadWarning;								
+								msgBoard.firstElementChild.innerHTML = $scope.i18n.payloadWarning;
+							} else if ($scope.myDeviceSelect === "overview") {
+								$scope.getElement("timersView").style.display = "none";
+								$scope.getElement("addTimerBtn").disabled = true;
+								$scope.getElement("overview").style.display = "block";
 							} else if ($scope.timers.filter(timer => timer.output == $scope.myDeviceSelect).length === 0) {
 								$scope.getElement("timersView").style.display = "none";
 								

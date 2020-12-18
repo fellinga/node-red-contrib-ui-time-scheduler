@@ -1,6 +1,16 @@
 # Changelog
 
 ----------
+## [v0.4.7] - 2020-12-18
+
+### New
+- added a overview site that is shown if multiple devices are configured
+
+### Changed
+- adjusted pointer
+- removed refresh prop for event mode
+
+----------
 ## [v0.4.6] - 2020-12-07
 
 ### New
