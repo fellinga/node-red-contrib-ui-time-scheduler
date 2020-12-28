@@ -149,12 +149,12 @@ module.exports = function(RED) {
 				</tbody>
 				</table>
 			</div>
-			<div id="addTimerView-` + uniqueId + `" style="display:none;">
-				<form ng-submit="addTimer()">
+			<div id="addTimerView-` + uniqueId + `" style="display:none; position: relative;">
+				<form ng-submit="addTimer()" style="width: 100%; position: absolute;">
 					<div layout="row" style="max-height: 60px;">
 						<md-input-container flex="50">
 							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.starttime") + `</label>
-							<input id="timerStarttime-` + uniqueId + `" ng-model="timerStarttime" type="time" required>
+							<input id="timerStarttime-` + uniqueId + `" value="00:00" type="time" required pattern="^([0-1][0-9]|2[0-3]):([0-5][0-9])$">
 							<span class="validity"></span>
 						</md-input-container>
 						${config.eventMode ? `
@@ -175,7 +175,7 @@ module.exports = function(RED) {
 						` : `
 						<md-input-container flex="45">
 							<label style="color: var(--nr-dashboard-widgetTextColor)">` + RED._("time-scheduler.ui.endtime") + `</label>
-							<input id="timerEndtime-` + uniqueId + `" ng-model="timerEndtime" type="time" required>
+							<input id="timerEndtime-` + uniqueId + `" value="00:00" type="time" required pattern="^([0-1][0-9]|2[0-3]):([0-5][0-9])$">
 							<span class="validity"></span>
 						</md-input-container>
 						`}
@@ -195,6 +195,9 @@ module.exports = function(RED) {
 						<md-button style="margin: 1px" type="submit">` + RED._("time-scheduler.ui.save") + `</md-button>
 					</div>
 				</form>
+				<div ng-show="loading" style="width:100%; position: absolute; z-index:10; opacity: 0.9; height:150px; line-height: 150px; background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);">
+					<center>` + RED._("time-scheduler.ui.loading") + `<center>
+				</div>
 			</div>
 		</div>
 		`;
@@ -314,10 +317,6 @@ module.exports = function(RED) {
 							$scope.getTimersFromServer();
 						});
 
-						$scope.$watch('timers', function() {
-							$scope.showStandardView();
-						});
-
 						$scope.toggleViews = function() {
 							$scope.isEditMode ? $scope.showStandardView() : $scope.showAddView();
 						}
@@ -363,15 +362,23 @@ module.exports = function(RED) {
 							if (timerIndex === undefined) {
 								const today = new Date();
 								if (today.getHours() == "23" && today.getMinutes() >= "54") today.setMinutes(53);
-								$scope.timerStarttime = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+1, 0);
-								$scope.timerEndtime = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+6, 0);
-								$scope.timerEvent = true;
+								const start = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+1, 0);
+								$scope.getElement("timerStarttime").value = $scope.formatTime(start.getHours(), start.getMinutes());
+								if ($scope.eventMode) $scope.timerEvent = true
+								else {
+									const end = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+6, 0);
+									$scope.getElement("timerEndtime").value = $scope.formatTime(end.getHours(), end.getMinutes());
+								}
 								$scope.myMultipleSelect.push(today.getDay());
 							} else {
 								const timer = $scope.timers[timerIndex];
-								$scope.timerStarttime = new Date(timer.starttime);
-								$scope.timerEndtime = new Date(timer.endtime);
-								$scope.timerEvent = timer.event;
+								const start = new Date(timer.starttime);
+								$scope.getElement("timerStarttime").value = $scope.formatTime(start.getHours(), start.getMinutes());
+								if ($scope.eventMode) $scope.timerEvent = timer.event;
+								else {
+									const end = new Date(timer.endtime);
+									$scope.getElement("timerEndtime").value = $scope.formatTime(end.getHours(), end.getMinutes());
+								}
 								for (let i = 0; i < timer.days.length; i++) {
 									if (timer.days[$scope.localDayToUtc(timer,i)]) $scope.myMultipleSelect.push(i);
 								}
@@ -379,7 +386,9 @@ module.exports = function(RED) {
 						}
 
 						$scope.addTimer = function() {
-							const starttime = $scope.getNowWithCustomTime($scope.timerStarttime.getTime());
+							const now = new Date();
+							const startInput = $scope.getElement("timerStarttime").value.split(":");
+							const starttime = new Date(now.getFullYear(), now.getMonth(), now.getDay(), startInput[0], startInput[1], 0, 0).getTime();
 
 							const timer = {
 								starttime: starttime,
@@ -397,7 +406,8 @@ module.exports = function(RED) {
 									timer.event = Number(timer.event);
 								}
 							} else {
-								const endtime = $scope.getNowWithCustomTime($scope.timerEndtime.getTime());
+								const endInput = $scope.getElement("timerEndtime").value.split(":");
+								const endtime = new Date(now.getFullYear(), now.getMonth(), now.getDay(), endInput[0], endInput[1], 0, 0).getTime();
 
 								if ($scope.diff(starttime, endtime) < 1) {
 									alert($scope.i18n.alertTimespan);
@@ -449,7 +459,12 @@ module.exports = function(RED) {
 						}
 
 						$scope.millisToTime = function(millis) {
-							return $scope.padZero(new Date(millis).getHours()) + ":" + $scope.padZero(new Date(millis).getMinutes()); 
+							const date = new Date(millis);
+							return $scope.formatTime(date.getHours(), date.getMinutes());
+						}
+
+						$scope.formatTime = function (hours, minutes) {
+							return $scope.padZero(hours) + ":" + $scope.padZero(minutes);
 						}
 
 						$scope.getNowWithCustomTime = function(timeInMillis) {
@@ -493,9 +508,18 @@ module.exports = function(RED) {
 							$.ajax({
 								url: "time-scheduler/getNode/" + $scope.timeschedulerid,
 								dataType: 'json',
-								async: false,
+								async: true,
+								beforeSend: function() {
+									$scope.loading = true;
+								},
 								success: function(json) {
 									$scope.timers = json;
+									$scope.$digest();
+								},
+								complete: function() {
+									$scope.loading = false;
+									$scope.showStandardView();
+									$scope.$digest();
 								}
 							});
 						}

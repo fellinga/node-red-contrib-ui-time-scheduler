@@ -29,6 +29,7 @@
             "daysActive": "Select active days",
             "save": "Save",
             "delete": "delete",
+            "loading": "Loading...",
             "on": "On",
             "off": "Off",
             "payloadWarning": "Invalid or no payload provided.",

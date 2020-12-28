@@ -29,6 +29,7 @@
             "daysActive": "Wähle aktive Tage",
             "save": "Speichern",
             "delete": "Löschen",
+            "loading": "Lädt...",
             "on": "Ein",
             "off": "Aus",
             "payloadWarning": "Fehlerhafte oder keine Daten erhalten.",

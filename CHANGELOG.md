@@ -1,6 +1,13 @@
 # Changelog
 
 ----------
+## [v0.4.8] - 2020-12-28
+
+### Changed
+- improved time input for firefox/safari
+- improved ajax request with loading overlay
+
+----------
 ## [v0.4.7] - 2020-12-18
 
 ### New
