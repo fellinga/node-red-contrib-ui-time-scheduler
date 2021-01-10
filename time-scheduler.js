@@ -545,8 +545,9 @@ module.exports = function(RED) {
 
 				function addOutputValues(myArray) {
 					for (let i = 0; i<config.devices.length; i++) {
-						const value = isInTime(i);
-						value != null ? myArray.push({payload: value}) : myArray.push(null);
+						const msg = {payload: isInTime(i)};
+						if (config.sendTopic) msg.topic = config.devices[i];
+						msg.payload != null ? myArray.push(msg) : myArray.push(null);
 					}
 				}
 

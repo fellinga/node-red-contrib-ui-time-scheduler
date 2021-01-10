@@ -64,6 +64,11 @@ SOFTWARE.
         <input type="number" id="node-input-refresh" min="1" max="60"/>
     </div>
     <div class="form-row">
+        <label for="node-input-sendTopic"><i class="fa fa-tasks"></i> Topic</label>
+        <input type="checkbox" id="node-input-sendTopic" style="display: inline-block; width: auto; vertical-align: top;">
+        <span data-i18n="time-scheduler.topicDesc"></span>
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="time-scheduler.label.name"></span> </label>
         <input type="text" id="node-input-name">
     </div>
@@ -81,6 +86,7 @@ SOFTWARE.
             devices: {value: ["Device 1"]},
             customPayload: {value: false},
             eventMode: {value: false},
+            sendTopic: {value: false},
             outputs: {value: 2},
             order: {value: 0},
             width: {
@@ -128,7 +134,7 @@ SOFTWARE.
                 }
             });
 
-            $("#node-input-device-container").css('min-height','222px').css('min-width','450px').editableList({
+            $("#node-input-device-container").css('min-height','165px').css('min-width','450px').editableList({
                 addItem: function(row, index, data) {
                     const current = node._("time-scheduler.label.device") + " " + (index+1);
                     
