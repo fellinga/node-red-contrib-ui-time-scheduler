@@ -1,6 +1,16 @@
 # Changelog
 
 ----------
+## [v1.5.0] - 2021-01-12
+
+### Fixed
+- overview time zone
+  
+## Changed
+- bump from 0.4.9 to 1.5.0
+  to follow semantic versioning
+
+----------
 ## [v0.4.9] - 2021-01-10
 
 ### New

@@ -99,8 +99,8 @@ module.exports = function(RED) {
 						</span>
 						<br ng-if="(timer.hasOwnProperty('event') && timer.event.length > 7)">
 						<span style="float:right;">
-							<span ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="dayIndex=$index+${config.startDay}">{{timer.days[dayIndex]===1 ? days[dayIndex]+"&nbsp;" : ""}}</span>
-							<span ng-repeat="day in days | limitTo : -${config.startDay}" ng-init="dayIndex=$index">{{timer.days[dayIndex]===1 ? days[dayIndex]+"&nbsp;" : ""}}</span>
+							<span ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="dayIndex=$index+${config.startDay}">{{timer.days[localDayToUtc(timer,dayIndex)]===1 ? days[dayIndex]+"&nbsp;" : ""}}</span>
+							<span ng-repeat="day in days | limitTo : -${config.startDay}" ng-init="dayIndex=$index">{{timer.days[localDayToUtc(timer,dayIndex)]===1 ? days[dayIndex]+"&nbsp;" : ""}}</span>
 						</span>
 						<br>
 					</span>
