@@ -93,7 +93,7 @@ module.exports = function(RED) {
 			<div id="overview-` + uniqueId + `" style="display:none; overflow:hidden">
 				<div ng-repeat="device in devices track by $index">
 					<h4> {{devices[$index]}} </h4>
-					<span ng-repeat="timer in filteredValues = (timers | filter:{ output: $index})" style="white-space: nowrap">
+					<span ng-repeat="timer in filteredValues = (timers | filter:{ output: $index.toString() }:true )" style="white-space: nowrap">
 						<span style="float:left; max-width: 100px;">
 							{{millisToTime(timer.starttime)}}-${config.eventMode ? `{{booleanToReadable(timer.event)}}` : `{{millisToTime(timer.endtime)}}`}
 						</span>
@@ -111,7 +111,7 @@ module.exports = function(RED) {
 			<div id="timersView-` + uniqueId + `" style="margin-top: 4px;">
 				<table style="width: 100%; border-spacing: 0px;">
 				<tbody>
-					<tr ng-repeat-start="timer in timers | filter:{ output: myDeviceSelect} track by $index" ng-click="showAddView(timers.indexOf(timer))" class="timerhead-` + uniqueId + `">
+					<tr ng-repeat-start="timer in timers | filter:{ output: myDeviceSelect }:true track by $index" ng-click="showAddView(timers.indexOf(timer))" class="timerhead-` + uniqueId + `">
 						<th> # </th>
 						${config.eventMode ? `
 						<th colspan="3">` + RED._("time-scheduler.ui.start") + `</th>
