@@ -1,6 +1,13 @@
 # Changelog
 
 ----------
+## [v1.5.2] - 2021-01-18
+
+### Changed
+- gui improvements
+- overview only shows devices with timers
+
+----------
 ## [v1.5.1] - 2021-01-13
 
 ### Fixed

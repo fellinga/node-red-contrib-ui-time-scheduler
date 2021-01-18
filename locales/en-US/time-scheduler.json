@@ -34,6 +34,7 @@
             "on": "On",
             "off": "Off",
             "payloadWarning": "Invalid or no payload provided.",
+            "emptyOverview": "Nothing planned yet. Click on \"Overview\" and select a device.",
             "nothingPlanned": "Nothing planned yet. Click the plus sign to add a new timer.",
             "alertTimespan": "Incorrect settings detected! \n - at least 1 minute \n - must not exceed midnight"
         }
