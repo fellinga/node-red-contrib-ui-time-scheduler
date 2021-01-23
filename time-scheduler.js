@@ -266,7 +266,8 @@ module.exports = function(RED) {
 									if (element.endtime === undefined) valid = false;
 								}
 
-								if (!element.output) element.output = 0;
+								if (!element.hasOwnProperty("output")) element.output = "0";
+								else if (Number.isInteger(element.output)) element.output = element.output.toString();
 							});
 							msg.payload = msg.payload.filter(t => t.output < config.devices.length);
 						} catch(e) {
@@ -296,9 +297,9 @@ module.exports = function(RED) {
 					},
 					initController: function ($scope) {
 						$scope.init = function (config) {
+							$scope.nodeId = config.id;
 							$scope.i18n = config.i18n;
 							$scope.days = config.i18n.days;
-							$scope.timeschedulerid = config.id;
 							$scope.devices = config.devices;
 							$scope.myDeviceSelect = $scope.devices.length > 1 ? "overview" : "0";
 							$scope.eventMode = config.eventMode;
@@ -379,7 +380,7 @@ module.exports = function(RED) {
 						$scope.addTimer = function() {
 							const now = new Date();
 							const startInput = $scope.getElement("timerStarttime").value.split(":");
-							const starttime = new Date(now.getFullYear(), now.getMonth(), now.getDay(), startInput[0], startInput[1], 0, 0).getTime();
+							const starttime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startInput[0], startInput[1], 0, 0).getTime();
 
 							const timer = {
 								starttime: starttime,
@@ -398,7 +399,8 @@ module.exports = function(RED) {
 								}
 							} else {
 								const endInput = $scope.getElement("timerEndtime").value.split(":");
-								const endtime = new Date(now.getFullYear(), now.getMonth(), now.getDay(), endInput[0], endInput[1], 0, 0).getTime();
+								let endtime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endInput[0], endInput[1], 0, 0).getTime();
+								if (endInput[0] === "00" && endInput[1] === "00") endtime += 24*60*60*1000;
 
 								if ($scope.diff(starttime, endtime) < 1) {
 									alert($scope.i18n.alertTimespan);
@@ -440,7 +442,7 @@ module.exports = function(RED) {
 						}
 
 						$scope.minutesToReadable = function(minutes) {
-							return (Math.floor(minutes/60) > 0 ? Math.floor(minutes/60) + "h " : "") + minutes%60 + "m";
+							return (Math.floor(minutes/60) > 0 ? Math.floor(minutes/60) + "h " : "") + (minutes%60 > 0 ? minutes%60+"m" : "");
 						}
 
 						$scope.booleanToReadable = function(e) {
@@ -492,12 +494,12 @@ module.exports = function(RED) {
 						}
 
 						$scope.getElement = function(elementId) {
-							return document.querySelector("#" + elementId + "-" + $scope.timeschedulerid.replace(".", ""));
+							return document.querySelector("#" + elementId + "-" + $scope.nodeId.replace(".", ""));
 						}
 
 						$scope.getTimersFromServer = function() {
 							$.ajax({
-								url: "time-scheduler/getNode/" + $scope.timeschedulerid,
+								url: "time-scheduler/getNode/" + $scope.nodeId,
 								dataType: 'json',
 								async: true,
 								beforeSend: function() {
@@ -551,9 +553,26 @@ module.exports = function(RED) {
 						nodeTimers.filter(timer => timer.output == device).forEach(function (timer) {		
 							if (status != null) return;
 
-							const localStarttime = new Date(timer.starttime);
-							// CHECK UTC DAY
 							const utcDay = localDayToUtc(timer, date.getDay());
+							const localStarttime = new Date(timer.starttime);
+							const localEndtime = config.eventMode ? localStarttime : new Date(timer.endtime);
+							const daysDiff = localEndtime.getDay()-localStarttime.getDay();
+
+							if (daysDiff != 0) {
+								// WRAPS AROUND MIDNIGHT (SERVER PERSPECTIVE)
+								const utcYesterday = utcDay-1 < 0 ? 6 : utcDay-1;
+								if (timer.days[utcYesterday] === 1) { 
+									// AND STARTED YESTERDAY (SERVER PERSPECTIVE)
+									const compareDate = new Date(localEndtime);
+									compareDate.setHours(date.getHours());
+									compareDate.setMinutes(date.getMinutes());
+									if (compareDate.getTime() < localEndtime.getTime()) {
+										status = true;
+										return;
+									}
+								}
+							}
+
 							if (timer.days[utcDay] === 0) return;
 
 							const compareDate = new Date(localStarttime);
@@ -565,7 +584,6 @@ module.exports = function(RED) {
 									status = timer.event;
 								}
 							} else {
-								const localEndtime = new Date(timer.endtime);
 								if (compareDate.getTime() >= localStarttime.getTime() && compareDate.getTime() < localEndtime.getTime()) {
 									status = true;
 								}

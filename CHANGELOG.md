@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.5.3] - 2021-01-22
+
+### Changed
+- allow endtime to be 00:00 (midnight)
+
+----------
 ## [v1.5.2] - 2021-01-18
 
 ### Changed
