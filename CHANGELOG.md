@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.6.0] - 2021-01-29
+
+### New
+- timers can be disabled/enabled now
+
+----------
 ## [v1.5.3] - 2021-01-22
 
 ### Changed

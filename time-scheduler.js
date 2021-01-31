@@ -28,7 +28,7 @@ module.exports = function(RED) {
 	function HTML(config) {
 		const uniqueId = config.id.replace(".", "");
 		const divPrimary = "ui-ts-" + uniqueId;
-	
+		
 		const styles = String.raw`
 		<style>
 			#${divPrimary} {
@@ -94,14 +94,15 @@ module.exports = function(RED) {
 				<div ng-repeat="device in devices track by $index">
 					<md-list flex ng-cloak ng-if="(filteredValues = (timers | filter:{ output: $index.toString() }:true)).length">
 						<md-subheader> <span class="md-subhead"> {{devices[$index]}} </span> </md-subheader>
-						<md-list-item ng-repeat="timer in filteredValues" style="min-height: 25px; height: 25px; padding: 0 2px;{{$index==0? '' : 'border-top: 1px solid var(--nr-dashboard-groupBorderColor)'}}">
-							<span style="overflow-x: hidden;">
+						<md-list-item ng-repeat="timer in filteredValues" style="min-height: 25px; height: 25px; padding: 0 2px;">
+							<span style="overflow-x: hidden; {{timer.disabled ? 'opacity: 0.4;' : ''}}">
 								{{millisToTime(timer.starttime)}}&#8209;${config.eventMode ? `{{booleanToReadable(timer.event)}}` : `{{millisToTime(timer.endtime)}}`}
 							</span>
-							<div class="md-secondary">
+							<div class="md-secondary" style="{{timer.disabled ? 'opacity: 0.4' : ''}};">
 								<span ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="dayIndex=$index+${config.startDay}">{{timer.days[localDayToUtc(timer,dayIndex)]===1 ? ($index!=0 ? "&nbsp;" : "")+days[dayIndex] : ""}}</span>
 								<span ng-repeat="day in days | limitTo : -${config.startDay}" ng-init="dayIndex=$index">{{timer.days[localDayToUtc(timer,dayIndex)]===1 ? ($index!=0 ? "&nbsp;" : "")+days[dayIndex] : ""}}</span>
 							</div>
+							<md-divider ng-if="!$last"></md-divider>
 						</md-list-item>
 					<md-list>
 				</div>
@@ -109,7 +110,7 @@ module.exports = function(RED) {
 			</div>
 			<div id="timersView-${uniqueId}">
 				<md-list flex ng-cloak style="text-align: center">
-					<md-subheader> 
+					<md-subheader>
 						<div layout="row" class="md-subhead">
 							<span flex=""> # </span>
 							${config.eventMode ? `
@@ -122,8 +123,8 @@ module.exports = function(RED) {
 							`}
 						</div>
 					</md-subheader>
-					<md-list-item class="md-2-line" style="height: 80px; padding: 0 5px;{{$index==0? '' : 'border-top: 1px solid var(--nr-dashboard-groupBorderColor)'}}" ng-repeat="timer in timers | filter:{ output: myDeviceSelect }:true track by $index">
-						<div class="md-list-item-text" ng-click="showAddView(timers.indexOf(timer))">
+					<md-list-item class="md-2-line" style="height: 80px; padding: 0 5px; border-left: 2px solid {{timer.disabled ? 'red' : 'transparent'}};" ng-repeat="timer in timers | filter:{ output: myDeviceSelect }:true track by $index">
+						<div class="md-list-item-text" ng-click="showAddView(timers.indexOf(timer))" style="opacity:{{timer.disabled ? 0.4 : 1}};">
 							<div layout="row">
 								<span flex=""> {{$index+1}} </span>
 								${config.eventMode ? `
@@ -139,11 +140,12 @@ module.exports = function(RED) {
 								<span flex="" ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="dayIndex=$index+${config.startDay}">
 									<span class="weekDay-${uniqueId} {{(timer.days[localDayToUtc(timer,dayIndex)]) ? 'weekDayActive-${uniqueId}' : ''}}"> {{days[dayIndex]}} </span>
 								</span>
-								<span flex="" ng-repeat="day in days | limitTo : -${config.startDay}" ng-init="dayIndex=$index" class="weekDay-${uniqueId} {{(timer.days[localDayToUtc(timer,dayIndex)]) ? 'weekDayActive-${uniqueId}' : ''}}">
+								<span flex="" ng-repeat="day in days | limitTo : -${config.startDay}" ng-init="dayIndex=$index">
 									<span class="weekDay-${uniqueId} {{(timer.days[localDayToUtc(timer,dayIndex)]) ? 'weekDayActive-${uniqueId}' : ''}}"> {{days[dayIndex]}} </span>
 								</span>
 							</div>
 						</div>
+						<md-divider ng-if="!$last"></md-divider>
 					</md-list-item>
 				<md-list>
 			</div>
@@ -159,12 +161,12 @@ module.exports = function(RED) {
 						${config.customPayload ? `
 						<md-input-container flex="50">
 							<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.event")}</label>
-							<input ng-model="timerEvent" required autocomplete="off">
+							<input ng-model="formtimer.timerEvent" required autocomplete="off">
 						</md-input-container>
 						` : `
 						<md-input-container flex="50">
 							<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.event")}</label>
-							<md-select class="nr-dashboard-dropdown" ng-model="timerEvent">
+							<md-select class="nr-dashboard-dropdown" ng-model="formtimer.timerEvent">
 								<md-option ng-value=true selected>${RED._("time-scheduler.ui.on")}</md-option>
 								<md-option ng-value=false >${RED._("time-scheduler.ui.off")}</md-option>
 							</md-select>
@@ -181,15 +183,18 @@ module.exports = function(RED) {
 					<div layout="row" style="max-height: 50px;">
 						<md-input-container>
 							<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.daysActive")}</label>
-							<md-select class="nr-dashboard-dropdown" multiple="true" placeholder="${RED._("time-scheduler.ui.daysActive")}" ng-model="myMultipleSelect">
+							<md-select class="nr-dashboard-dropdown" multiple="true" placeholder="${RED._("time-scheduler.ui.daysActive")}" ng-model="formtimer.dayselect">
 								<md-option ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="$index=$index+${config.startDay}" value={{$index}}> {{days[$index]}} </md-option>
 								<md-option ng-repeat="day in days | limitTo : -${config.startDay}" value={{$index}}> {{days[$index]}} </md-option>
 							</md-select>
 						</md-input-container>
 					</div>
 					<div layout="row" layout-align="space-between end" style="height: 40px;">
-						<md-button style="margin: 1px" ng-click="deleteTimer()" ng-show="hiddenTimerIndex !== undefined">${RED._("time-scheduler.ui.delete")}</md-button>
-						<span ng-show="hiddenTimerIndex === undefined"> </span>
+						<md-button style="margin: 1px;" ng-show="formtimer.index !== undefined" ng-click="deleteTimer()">${RED._("time-scheduler.ui.delete")}</md-button>
+						<md-button style="margin: 1px;" ng-show="formtimer.index !== undefined" ng-click="formtimer.disabled=!formtimer.disabled">
+							{{formtimer.disabled ? i18n.disabled : i18n.enabled}}
+						</md-button>
+						<span ng-show="formtimer.index === undefined"> </span>
 						<md-button style="margin: 1px" type="submit">${RED._("time-scheduler.ui.save")}</md-button>
 					</div>
 				</form>
@@ -238,7 +243,7 @@ module.exports = function(RED) {
 			if (!config.hasOwnProperty("devices") || config.devices.length === 0) config.devices = [config.name];
 			// END check props
 			config.i18n = RED._("time-scheduler.ui", { returnObjects: true });
-			
+
 			if (checkConfig(config, node)) {
 				const done = ui.addWidget({
 					node: node,
@@ -273,7 +278,7 @@ module.exports = function(RED) {
 						} catch(e) {
 							valid = false;
 						}
-						
+
 						if (valid) {
 							node.status({fill:"green",shape:"dot",text:"time-scheduler.payloadReceived"});
 							nodeTimers = msg.payload;
@@ -305,8 +310,8 @@ module.exports = function(RED) {
 							$scope.eventMode = config.eventMode;
 						}
 
-						$scope.$watch('msg', function() {
-							$scope.getTimersFromServer();
+						$scope.$watch('msg', function(msg) {
+							if (msg != undefined) $scope.getTimersFromServer();
 						});
 
 						$scope.toggleViews = function() {
@@ -325,7 +330,7 @@ module.exports = function(RED) {
 							if (!$scope.timers) {
 								$scope.getElement("timersView").style.display = "none";
 								$scope.getElement("addTimerBtn").disabled = true;
-								
+
 								const msgBoard = $scope.getElement("messageBoard");
 								msgBoard.style.display = "block";
 								msgBoard.firstElementChild.innerHTML = $scope.i18n.payloadWarning;
@@ -335,7 +340,7 @@ module.exports = function(RED) {
 								$scope.getElement("overview").style.display = "block";
 							} else if ($scope.timers.filter(timer => timer.output == $scope.myDeviceSelect).length === 0) {
 								$scope.getElement("timersView").style.display = "none";
-								
+
 								const msgBoard = $scope.getElement("messageBoard");
 								msgBoard.style.display = "block";
 								msgBoard.firstElementChild.innerHTML = $scope.i18n.nothingPlanned;
@@ -348,32 +353,34 @@ module.exports = function(RED) {
 							$scope.getElement("timersView").style.display = "none";
 							$scope.getElement("messageBoard").style.display = "none";
 							$scope.getElement("addTimerView").style.display = "block";
-							$scope.hiddenTimerIndex = timerIndex;
-							$scope.myMultipleSelect = [];
-							
+							$scope.formtimer = {index: timerIndex};
+							$scope.formtimer.dayselect = [];
+
 							if (timerIndex === undefined) {
 								const today = new Date();
 								if (today.getHours() == "23" && today.getMinutes() >= "54") today.setMinutes(53);
 								const start = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+1, 0);
 								$scope.getElement("timerStarttime").value = $scope.formatTime(start.getHours(), start.getMinutes());
-								if ($scope.eventMode) $scope.timerEvent = true
+								if ($scope.eventMode) $scope.formtimer.timerEvent = true;
 								else {
 									const end = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+6, 0);
 									$scope.getElement("timerEndtime").value = $scope.formatTime(end.getHours(), end.getMinutes());
 								}
-								$scope.myMultipleSelect.push(today.getDay());
+								$scope.formtimer.dayselect.push(today.getDay());
+								$scope.formtimer.disabled = false;
 							} else {
 								const timer = $scope.timers[timerIndex];
 								const start = new Date(timer.starttime);
 								$scope.getElement("timerStarttime").value = $scope.formatTime(start.getHours(), start.getMinutes());
-								if ($scope.eventMode) $scope.timerEvent = timer.event;
+								if ($scope.eventMode) $scope.formtimer.timerEvent = timer.event;
 								else {
 									const end = new Date(timer.endtime);
 									$scope.getElement("timerEndtime").value = $scope.formatTime(end.getHours(), end.getMinutes());
 								}
 								for (let i = 0; i < timer.days.length; i++) {
-									if (timer.days[$scope.localDayToUtc(timer,i)]) $scope.myMultipleSelect.push(i);
+									if (timer.days[$scope.localDayToUtc(timer,i)]) $scope.formtimer.dayselect.push(i);
 								}
+								$scope.formtimer.disabled = timer.hasOwnProperty("disabled");
 							}
 						}
 
@@ -389,7 +396,7 @@ module.exports = function(RED) {
 							};
 
 							if ($scope.eventMode) {
-								timer.event = $scope.timerEvent;
+								timer.event = $scope.formtimer.timerEvent;
 								if (timer.event === "true" || timer.event === true) {
 									timer.event = true;
 								} else if (timer.event === "false" || timer.event === false) {
@@ -409,13 +416,15 @@ module.exports = function(RED) {
 
 								timer.endtime = endtime;
 							}
-			
-							$scope.myMultipleSelect.forEach(day => {
+
+							$scope.formtimer.dayselect.forEach(day => {
 								const utcDay = $scope.localDayToUtc(timer, Number(day));
 								timer.days[utcDay] = 1;
 							});
 
-							const timerIndex = $scope.hiddenTimerIndex;
+							if ($scope.formtimer.disabled) timer.disabled = "disabled";
+
+							const timerIndex = $scope.formtimer.index;
 							if (timerIndex === undefined) {
 								$scope.timers.push(timer);
 							} else {
@@ -427,11 +436,11 @@ module.exports = function(RED) {
 								const millisB = $scope.getNowWithCustomTime(b.starttime);
 								return millisA - millisB;
 							});
-							$scope.sendTimersToOutput();		
+							$scope.sendTimersToOutput();
 						}
 
 						$scope.deleteTimer = function() {
-							$scope.timers.splice($scope.hiddenTimerIndex,1);
+							$scope.timers.splice($scope.formtimer.index,1);
 							$scope.sendTimersToOutput();
 						}
 
@@ -465,7 +474,7 @@ module.exports = function(RED) {
 							const origDate = new Date(timeInMillis);
 							date.setHours(origDate.getHours());
 							date.setMinutes(origDate.getMinutes());
-							date.setSeconds(0); date.setMilliseconds(0); 
+							date.setSeconds(0); date.setMilliseconds(0);
 							return date.getTime();
 						}
 
@@ -484,12 +493,12 @@ module.exports = function(RED) {
 							return i < 10 ? "0"+i : i;
 						}
 
-						$scope.diff = function(startDate, endDate) {						
+						$scope.diff = function(startDate, endDate) {
 							let diff = endDate - startDate;
 							const hours = Math.floor(diff / 1000 / 60 / 60);
 							diff -= hours * 1000 * 60 * 60;
 							const minutes = Math.floor(diff / 1000 / 60);
-							
+
 							return (hours*60)+minutes;
 						}
 
@@ -549,9 +558,10 @@ module.exports = function(RED) {
 
 					if (nodeTimers.length > 0) {
 						const date = new Date();
-						
-						nodeTimers.filter(timer => timer.output == device).forEach(function (timer) {		
+
+						nodeTimers.filter(timer => timer.output == device).forEach(function (timer) {
 							if (status != null) return;
+							if (timer.hasOwnProperty("disabled")) return;
 
 							const utcDay = localDayToUtc(timer, date.getDay());
 							const localStarttime = new Date(timer.starttime);
@@ -561,7 +571,7 @@ module.exports = function(RED) {
 							if (daysDiff != 0) {
 								// WRAPS AROUND MIDNIGHT (SERVER PERSPECTIVE)
 								const utcYesterday = utcDay-1 < 0 ? 6 : utcDay-1;
-								if (timer.days[utcYesterday] === 1) { 
+								if (timer.days[utcYesterday] === 1) {
 									// AND STARTED YESTERDAY (SERVER PERSPECTIVE)
 									const compareDate = new Date(localEndtime);
 									compareDate.setHours(date.getHours());

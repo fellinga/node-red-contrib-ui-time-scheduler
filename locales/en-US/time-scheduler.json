@@ -31,6 +31,8 @@
             "save": "Save",
             "delete": "delete",
             "loading": "Loading...",
+            "enabled": "enabled",
+            "disabled": "disabled",
             "on": "On",
             "off": "Off",
             "payloadWarning": "Invalid or no payload provided.",

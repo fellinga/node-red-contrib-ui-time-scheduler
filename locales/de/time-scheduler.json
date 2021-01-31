@@ -31,6 +31,8 @@
             "save": "Speichern",
             "delete": "Löschen",
             "loading": "Lädt...",
+            "enabled": "aktiv",
+            "disabled": "inaktiv",
             "on": "Ein",
             "off": "Aus",
             "payloadWarning": "Fehlerhafte oder keine Daten erhalten.",
