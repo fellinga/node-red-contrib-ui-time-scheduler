@@ -311,7 +311,7 @@ module.exports = function(RED) {
 						}
 
 						$scope.$watch('msg', function(msg) {
-							if (msg != undefined) $scope.getTimersFromServer();
+							$scope.getTimersFromServer();
 						});
 
 						$scope.toggleViews = function() {

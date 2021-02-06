@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.6.1] - 2021-02-06
+
+### fixed
+- fixed no payload error
+  
+----------
 ## [v1.6.0] - 2021-01-29
 
 ### New
