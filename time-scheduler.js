@@ -557,7 +557,7 @@ module.exports = function(RED) {
 				function addOutputValues(outputValues) {
 					for (let device = 0; device < config.devices.length; device++) {
 						const msg = {payload: isInTime(device)};
-						if (config.sendTopic) msg.topic = config.devices[i];
+						if (config.sendTopic) msg.topic = config.devices[device];
 						msg.payload != null ? outputValues.push(msg) : outputValues.push(null);
 					}
 				}
