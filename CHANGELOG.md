@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.7.0] - 2021-03-20
+
+### new
+- data is now stored in node.context
+  
+----------
 ## [v1.6.1] - 2021-02-06
 
 ### fixed

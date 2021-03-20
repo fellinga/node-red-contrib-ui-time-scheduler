@@ -2,6 +2,7 @@
     "time-scheduler" : {
         "payloadReceived": "Payload erhalten.",
         "invalidPayload": "Ungültige Payload.",
+        "contextCreated": "Kontext erstellt.",
         "label": {
             "name": "Name",
             "size": "Größe",
