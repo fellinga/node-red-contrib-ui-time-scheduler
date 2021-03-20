@@ -21,15 +21,21 @@ node-red-dashboard v2.10.0 (v2.15.4 or above would be ideal)
 Add a time-scheduler-node to your flow. Open the dashboard, you will see an empty scheduler.
 Click the plus sign at the top right corner of the node to create a new schedule.
   
-### Input & Output
+### Output
   
-Whenever you add or delete a schedule, the node sends a JSON string to its top output. You can use such a string to directly inject timers after a (re)boot or (re)deploy. 
+Whenever you add or delete a schedule a JSON string is sent to its top output. This JSON string contains all schedules.
 
 Every other output (number of total outputs depends on how many devices you have added) emits true/false every 60 seconds. In Event Mode true/false is only sent at the specified time. Adjusting the refresh rate and the number of devices is possible within the node's options.
   
-![](images/time-scheduler-flow.jpg)
-
 Tip: If you want to block values unless the value has changed, add a RBE node to the desired outout.
+
+### Input & restoring schedules after a reboot
+  
+You can use the JSON string from the nodes top output to directly inject timers after a (re)boot or (re)deploy:
+  
+![](images/time-scheduler-flow.jpg)
+  
+If you changed the node-red <a target="blank" href="https://nodered.org/docs/user-guide/context#context-stores">contextStorage to localfilesystem</a>, schedules are automatically saved and restored after a reboot.
   
 ### Frontend & Demo
   

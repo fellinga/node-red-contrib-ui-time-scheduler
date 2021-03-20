@@ -229,11 +229,6 @@ module.exports = function(RED) {
 
 			RED.nodes.createNode(this,config);
 			const node = this;
-			let nodeTimers = [];
-
-			this.nodeCallback = function nodeCallback(req, res) {
-				res.send(nodeTimers);
-			}
 
 			// START check props
 			if (!config.hasOwnProperty("refresh")) config.refresh = 60;
@@ -256,36 +251,16 @@ module.exports = function(RED) {
 					storeFrontEndInputAsState: true,
 					persistantFrontEndValue : true,
 					beforeEmit: function (msg, value) {
-						let valid = true;
-
 						try {
-							msg.payload = JSON.parse(value).timers;
-							msg.payload.forEach(element => {
-								if (element.starttime === undefined || element.days === undefined) {
-									valid = false;
-								}
-
-								if (config.eventMode) {
-									if (element.event === undefined) valid = false;
-								} else {
-									if (element.endtime === undefined) valid = false;
-								}
-
-								if (!element.hasOwnProperty("output")) element.output = "0";
-								else if (Number.isInteger(element.output)) element.output = element.output.toString();
-							});
-							msg.payload = msg.payload.filter(t => t.output < config.devices.length);
+							const parsedInput = JSON.parse(value).timers;
+							if (validateTimers(parsedInput)) {
+								node.status({fill:"green",shape:"dot",text:"time-scheduler.payloadReceived"});
+								setTimers(parsedInput.filter(timer => timer.output < config.devices.length));
+							} else {
+								node.status({fill:"yellow",shape:"dot",text:"time-scheduler.invalidPayload"});
+							}
 						} catch(e) {
-							valid = false;
-						}
-
-						if (valid) {
-							node.status({fill:"green",shape:"dot",text:"time-scheduler.payloadReceived"});
-							nodeTimers = msg.payload;
-						} else {
-							node.status({fill:"yellow",shape:"dot",text:"time-scheduler.invalidPayload"});
-							nodeTimers = [];
-							msg.payload = [];
+							node.status({fill:"red",shape:"dot",text: e.toString()});
 						}
 
 						return {msg: [msg]};
@@ -293,7 +268,7 @@ module.exports = function(RED) {
 					beforeSend: function (msg, orig) {
 						node.status({});
 						if (orig && orig.msg[0]) {
-							nodeTimers = orig.msg[0].payload;
+							setTimers(orig.msg[0].payload);
 							const sendMsg = JSON.parse(JSON.stringify(orig.msg));
 							sendMsg[0].payload = JSON.stringify({timers : sendMsg[0].payload});
 							addOutputValues(sendMsg);
@@ -310,7 +285,7 @@ module.exports = function(RED) {
 							$scope.eventMode = config.eventMode;
 						}
 
-						$scope.$watch('msg', function(msg) {
+						$scope.$watch('msg', function() {
 							$scope.getTimersFromServer();
 						});
 
@@ -529,6 +504,41 @@ module.exports = function(RED) {
 				});
 
 				let nodeInterval;
+
+				(() => {
+					let timers = node.context().get('timers');
+					if (validateTimers(timers)) {
+						node.status({});
+						timers = timers.filter(timer => timer.output < config.devices.length);
+					} else {
+						node.status({fill:"green",shape:"dot",text:"time-scheduler.contextCreated"});
+						timers = [];
+					}
+					setTimers(timers);
+					createInitTimeout();
+				})();
+
+				function validateTimers(timers) {
+					return Array.isArray(timers) && timers.every(element => {
+						if ((!element.hasOwnProperty("starttime") || !element.hasOwnProperty("days")) ||
+						(!config.eventMode && !element.hasOwnProperty("endtime")) ||
+						(config.eventMode && !element.hasOwnProperty("event"))) return false;
+
+						if (!element.hasOwnProperty("output")) element.output = "0";
+						else if (Number.isInteger(element.output)) element.output = element.output.toString();
+
+						return true;
+					});
+				}
+
+				function getTimers() {
+					return node.context().get('timers') || [];
+				}
+
+				function setTimers(timers) {
+					node.context().set('timers', timers);
+				}
+
 				function createInitTimeout() {
 					const today = new Date();
 					const remaining = config.refresh - (today.getSeconds()%config.refresh);
@@ -537,7 +547,6 @@ module.exports = function(RED) {
 						intervalTimerFunction();
 					}, (remaining*1000) - today.getMilliseconds());
 				}
-				createInitTimeout();
 
 				function intervalTimerFunction() {
 					const outputValues = [null];
@@ -545,15 +554,16 @@ module.exports = function(RED) {
 					node.send(outputValues);
 				}
 
-				function addOutputValues(myArray) {
-					for (let i = 0; i<config.devices.length; i++) {
-						const msg = {payload: isInTime(i)};
+				function addOutputValues(outputValues) {
+					for (let device = 0; device < config.devices.length; device++) {
+						const msg = {payload: isInTime(device)};
 						if (config.sendTopic) msg.topic = config.devices[i];
-						msg.payload != null ? myArray.push(msg) : myArray.push(null);
+						msg.payload != null ? outputValues.push(msg) : outputValues.push(null);
 					}
 				}
 
 				function isInTime(device) {
+					const nodeTimers = getTimers();
 					let status = null;
 
 					if (nodeTimers.length > 0) {
@@ -614,6 +624,10 @@ module.exports = function(RED) {
 					if (utcDay < 0) utcDay = 6;
 					if (utcDay > 6) utcDay = 0;
 					return utcDay;
+				}
+
+				node.nodeCallback = function nodeCallback(req, res) {
+					res.send(getTimers());
 				}
 
 				node.on("close", function() {
