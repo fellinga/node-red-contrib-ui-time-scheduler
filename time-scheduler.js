@@ -96,7 +96,7 @@ module.exports = function(RED) {
 						<md-subheader> <span class="md-subhead"> {{devices[$index]}} </span> </md-subheader>
 						<md-list-item ng-repeat="timer in filteredValues" style="min-height: 25px; height: 25px; padding: 0 2px;">
 							<span style="overflow-x: hidden; {{timer.disabled ? 'opacity: 0.4;' : ''}}">
-								{{millisToTime(timer.starttime)}}&#8209;${config.eventMode ? `{{booleanToReadable(timer.event)}}` : `{{millisToTime(timer.endtime)}}`}
+								{{millisToTime(timer.starttime)}}&#8209;${config.eventMode ? `{{eventToEventLabel(timer.event)}}` : `{{millisToTime(timer.endtime)}}`}
 							</span>
 							<div class="md-secondary" style="{{timer.disabled ? 'opacity: 0.4' : ''}};">
 								<span ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="dayIndex=$index+${config.startDay}">{{timer.days[localDayToUtc(timer,dayIndex)]===1 ? ($index!=0 ? "&nbsp;" : "")+days[dayIndex] : ""}}</span>
@@ -129,7 +129,7 @@ module.exports = function(RED) {
 								<span flex=""> {{$index+1}} </span>
 								${config.eventMode ? `
 								<span flex="40"> {{millisToTime(timer.starttime)}} </span>
-								<span flex="45"> {{booleanToReadable(timer.event)}} </span>
+								<span flex="45"> {{eventToEventLabel(timer.event)}} </span>
 								` : `
 								<span flex="30"> {{millisToTime(timer.starttime)}} </span>
 								<span flex="30"> {{millisToTime(timer.endtime)}} </span>
@@ -158,20 +158,16 @@ module.exports = function(RED) {
 							<span class="validity"></span>
 						</md-input-container>
 						${config.eventMode ? `
-						${config.customPayload ? `
 						<md-input-container flex="50">
 							<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.event")}</label>
+							${config.customPayload ? `
 							<input ng-model="formtimer.timerEvent" required autocomplete="off">
-						</md-input-container>
-						` : `
-						<md-input-container flex="50">
-							<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.event")}</label>
-							<md-select class="nr-dashboard-dropdown" ng-model="formtimer.timerEvent">
-								<md-option ng-value=true selected>${RED._("time-scheduler.ui.on")}</md-option>
-								<md-option ng-value=false >${RED._("time-scheduler.ui.off")}</md-option>
+							` : `
+							<md-select class="nr-dashboard-dropdown" ng-model="formtimer.timerEvent" required>
+								<md-option ng-repeat="option in eventOptions" value={{option.event}}> {{option.label}} </md-option>
 							</md-select>
+							`}
 						</md-input-container>
-						`}
 						` : `
 						<md-input-container flex="45">
 							<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.endtime")}</label>
@@ -236,6 +232,7 @@ module.exports = function(RED) {
 			if (!config.hasOwnProperty("height") || config.height == 0) config.height = 1;
 			if (!config.hasOwnProperty("name") || config.name === "") config.name = "Time-Scheduler";
 			if (!config.hasOwnProperty("devices") || config.devices.length === 0) config.devices = [config.name];
+			if (!config.hasOwnProperty("eventOptions")) config.eventOptions = [{label: RED._("time-scheduler.label.on"), event: "true"}, {label: RED._("time-scheduler.label.off"), event: "false"}];
 			// END check props
 			config.i18n = RED._("time-scheduler.ui", { returnObjects: true });
 
@@ -283,6 +280,7 @@ module.exports = function(RED) {
 							$scope.devices = config.devices;
 							$scope.myDeviceSelect = $scope.devices.length > 1 ? "overview" : "0";
 							$scope.eventMode = config.eventMode;
+							$scope.eventOptions = config.eventOptions;
 						}
 
 						$scope.$watch('msg', function() {
@@ -336,7 +334,7 @@ module.exports = function(RED) {
 								if (today.getHours() == "23" && today.getMinutes() >= "54") today.setMinutes(53);
 								const start = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+1, 0);
 								$scope.getElement("timerStarttime").value = $scope.formatTime(start.getHours(), start.getMinutes());
-								if ($scope.eventMode) $scope.formtimer.timerEvent = true;
+								if ($scope.eventMode) $scope.formtimer.timerEvent = $scope.eventOptions.length > 0 ? $scope.eventOptions[0].event : "true";
 								else {
 									const end = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+6, 0);
 									$scope.getElement("timerEndtime").value = $scope.formatTime(end.getHours(), end.getMinutes());
@@ -429,10 +427,9 @@ module.exports = function(RED) {
 							return (Math.floor(minutes/60) > 0 ? Math.floor(minutes/60) + "h " : "") + (minutes%60 > 0 ? minutes%60+"m" : "");
 						}
 
-						$scope.booleanToReadable = function(e) {
-							if (e === 'true' || e === true) return $scope.i18n.on;
-							if (e === 'false' || e === false) return $scope.i18n.off;
-							return e;
+						$scope.eventToEventLabel = function(event) {
+							const option = $scope.eventOptions.find(o => { return o.event === event.toString() });
+							return option ? option.label : event;
 						}
 
 						$scope.millisToTime = function(millis) {
