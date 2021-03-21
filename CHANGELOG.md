@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.8.0] - 2021-03-21
+
+### new
+- added configurable options for events
+
+----------
 ## [v1.7.1] - 2021-03-20
 
 ### fixed
