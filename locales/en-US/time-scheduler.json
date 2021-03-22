@@ -8,8 +8,9 @@
             "size": "Size",
             "group": "Group",
             "startDay": "First Day",
+            "block": "Block",
             "refresh": "Refresh",
-            "customPayload" : "Payload",
+            "customPayload" : "User Events",
             "on": "On",
             "off": "Off",
             "eventMode": "Event Mode",
@@ -18,8 +19,9 @@
             "device": "Device"
         },
         "days": ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-        "customPayloadDesc": "Accept free-form input for events",
+        "customPayloadDesc": "Accept free-form frontend input for events",
         "eventModeDesc": "Schedule single events rather than a time span",
+        "onlySendChangeDesc": "Block device output unless value changes",
         "topicDesc": "Send the device name via msg.topic",
         "copy": "copy",
         "ui" : {

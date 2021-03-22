@@ -8,8 +8,9 @@
             "size": "Größe",
             "group": "Gruppe",
             "startDay": "Erster Tag",
+            "block": "Blocke",
             "refresh": "Refresh",
-            "customPayload" : "Payload",
+            "customPayload" : "User Events",
             "on": "Ein",
             "off": "Aus",
             "eventMode": "Event Modus",
@@ -18,8 +19,9 @@
             "device": "Gerät"
         },
         "days": ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"],
-        "customPayloadDesc": "Akzeptiere Freitexteingaben für Events",
+        "customPayloadDesc": "Akzeptiere Frontend-Freitexteingaben für Events",
         "eventModeDesc": "Erstelle einzelne Events anstatt eines Zeitplanes",
+        "onlySendChangeDesc": "Blockiere Nachrichten bis sich der Wert ändert",
         "topicDesc": "Sende den Gerätenamen per msg.topic",
         "copy": "Kopie",
         "ui" : {

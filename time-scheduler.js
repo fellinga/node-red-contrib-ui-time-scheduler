@@ -501,6 +501,7 @@ module.exports = function(RED) {
 				});
 
 				let nodeInterval;
+				let prevMsg = [];
 
 				(() => {
 					let timers = node.context().get('timers');
@@ -548,6 +549,7 @@ module.exports = function(RED) {
 				function intervalTimerFunction() {
 					const outputValues = [null];
 					addOutputValues(outputValues);
+					if (config.onlySendChange) removeUnchangedValues(outputValues);
 					node.send(outputValues);
 				}
 
@@ -557,6 +559,16 @@ module.exports = function(RED) {
 						if (config.sendTopic) msg.topic = config.devices[device];
 						msg.payload != null ? outputValues.push(msg) : outputValues.push(null);
 					}
+				}
+
+				function removeUnchangedValues(outputValues) {
+					const currMsg = JSON.parse(JSON.stringify(outputValues));
+					for (let i = 1; i <= config.devices.length; i++) {
+						if (prevMsg[i] && currMsg[i] && (prevMsg[i].payload === currMsg[i].payload)) {
+							outputValues[i] = null;
+						}
+					}
+					prevMsg = currMsg;
 				}
 
 				function isInTime(device) {

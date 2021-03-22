@@ -70,6 +70,11 @@ SOFTWARE.
         </select>
     </div>
     <div class="form-row">
+        <label for="node-input-onlySendChange"><i class="fa fa-hand-paper-o"></i> <span data-i18n="time-scheduler.label.block"></span> </label>
+        <input type="checkbox" id="node-input-onlySendChange" style="display: inline-block; width: auto; vertical-align: top;">
+        <span data-i18n="time-scheduler.onlySendChangeDesc"></span>
+    </div>
+    <div class="form-row">
         <label for="node-input-sendTopic"><i class="fa fa-tasks"></i> Topic</label>
         <input type="checkbox" id="node-input-sendTopic" style="display: inline-block; width: auto; vertical-align: top;">
         <span data-i18n="time-scheduler.topicDesc"></span>
@@ -90,6 +95,7 @@ SOFTWARE.
             startDay: {value: 0},
             refresh: {value: 60},
             devices: {value: ["Device 1"]},
+            onlySendChange: {value: false},
             customPayload: {value: false},
             eventMode: {value: false},
             eventOptions: {value: [{label: RED._("time-scheduler.label.on"), event: "true"}, {label: RED._("time-scheduler.label.off"), event: "false"}] },
