@@ -3,31 +3,40 @@
 
     <h3>Eingänge</h3>
     <dl class="message-properties">
-        <dt>payload
-            <span class="property-type">JSON string</span>
-        </dt>
-        <dd> ein bestehender Zeitplan </dd>
+        <dt>payload <span class="property-type">JSON string</span> </dt>
+        <dd> bestehender Zeitplan und Einstellungen (generiert vom obersten Ausgang) </dd>
+        <dt>disableDevice <span class="property-type">number | string</span> </dt>
+        <dd> Gerätename oder Index des Gerätes das deaktivert werden soll </dd>
+        <dt>enableDevice <span class="property-type">number | string</span> </dt>
+        <dd> Gerätename oder Index des Gerätes das aktiviert werden soll </dd>
     </dl>
 
     <h3>Ausgänge</h3>
     <ol class="node-ports">
-        <li> Gibt den aktuellen Zeitplan aus
+        <li> Gibt den aktuellen Zeitplan und Einstellungen aus
             <dl class="message-properties">
                 <dt>payload <span class="property-type">JSON string</span></dt>
                 <dd>ein modifizierter oder neuer Zeitplan</dd>
             </dl>
         </li>
-        <li> Gibt den aktuellen Zustand aus
+        <li> to N - Gibt den aktuellen Zustand aus
             <dl class="message-properties">
-                <dt>payload <span class="property-type">boolean</span></dt>
-                <dd>true oder false, je nach Zeitplan</dd>
+                <dt>payload <span class="property-type">boolean | number | string</span></dt>
+                <dd>true, false oder das eingestellte Event, je nach Zeitplan</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>topic <span class="property-type">string</span></dt>
+                <dd>enthält den Namen des Gerätes (falls aktiviert)</dd>
             </dl>
         </li>
     </ol>
 
     <h3>Details</h3>
-    <p> Eine eingehende <code>msg.payload</code> wird als Zeitplan verwendet. Du 
-        kannst diese benutzen um einen bereits erstellten Zeitplan nach einem gewissen 
+    <p> Falls der Node-RED <a href="https://nodered.org/docs/user-guide/context#context-stores">contextStorage auf localfilesystem</a>
+        geändert wurde, werden alle Zeitpläne und Einstellungen automatisch gespeichert und
+        nach einem Neustart automatisch wiederhergestellt.
+        Andernfalls wird eine eingehende <code>msg.payload</code> als Zeitplan verwendet.
+        Du kannst diese benutzen um einen bereits erstellten Zeitplan nach einem gewissen 
         Event oder einfach nach einem Neustart zu laden. Wenn nichts per payload
         eingepeist wird, oder diese Fehlerhaft ist, dann wird der Zeitplaner neu
         initialsiert.

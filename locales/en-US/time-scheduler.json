@@ -3,6 +3,8 @@
         "payloadReceived": "Payload received.",
         "invalidPayload": "Payload invalid.",
         "contextCreated": "Context created.",
+        "enabled": "enabled",
+        "disabled": "disabled",
         "label": {
             "name": "Name",
             "size": "Size",
@@ -34,13 +36,10 @@
             "overview": "Overview",
             "days": ["SU","MO","TU","WE","TH","FR","SA"],
             "daysActive": "Select active days",
-            "save": "Save",
-            "delete": "delete",
-            "loading": "Loading...",
-            "enabled": "enabled",
-            "disabled": "disabled",
+            "active": "Active",
+            "all": "All",
             "payloadWarning": "Invalid or no payload provided.",
-            "emptyOverview": "Nothing planned yet. Click on \"Overview\" and select a device.",
+            "emptyOverview": "Nothing planned yet. Click \"Overview\" and select a device.",
             "nothingPlanned": "Nothing planned yet. Click the plus sign to add a new timer.",
             "alertTimespan": "Incorrect settings detected! \n - at least 1 minute \n - must not exceed midnight"
         }

@@ -157,14 +157,14 @@ SOFTWARE.
                 }
             });
 
-            $("#node-input-device-container").css('min-height','165px').css('min-width','450px').editableList({
+            $("#node-input-device-container").css('min-height','165px').editableList({
                 addItem: function(row, index, data) {
                     const current = node._("time-scheduler.label.device") + " " + (index+1);
                     
                     const label = $('<span/>', {class:"node-input-device-label", text:" " + current});
                     $(row).html(label);
                     
-                    const nameInput = $('<input/>',{class:"node-input-device-name",type:"text",style:"margin-left: 5px;", value:data.name || current});
+                    const nameInput = $('<input/>',{class:"node-input-device-name",type:"text",style:"margin-left:7px; width:calc(75% - 32px);", value:data.name || current});
                     nameInput.appendTo(row).typedInput({default:'str',types:['str']});
 
                     const finalspan = $('<span/>',{style:"float: right;margin-top: 6px;"}).appendTo(row);
@@ -200,7 +200,7 @@ SOFTWARE.
                 sortable: true
             });
 
-            $("#node-input-eventOption-container").css('min-height','115px').css('min-width','450px').editableList({
+            $("#node-input-eventOption-container").css('min-height','115px').editableList({
                 addItem: function(row, index, option) {
                     $(row).html('<span/>');
                     const labelField = $('<input/>',{class:"node-input-eventOption-label",type:"text",style:"margin-left:7px; width:calc(50% - 32px);", placeholder: 'Label', value:option.label});

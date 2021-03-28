@@ -1,10 +1,11 @@
 # Changelog
 
 ----------
-## [v1.9.0] - 2021-03-22
+## [v1.9.0] - 2021-03-28
 
 ### new
 - option to block device output unless value changes
+- devices can be disabled/enabled now
   
 ----------
 ## [v1.8.0] - 2021-03-21
