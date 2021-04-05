@@ -17,6 +17,8 @@
             "off": "Off",
             "eventMode": "Event Mode",
             "eventOptions": "Event Options",
+            "latitude": "Latitude",
+            "longitude": "Longitude",
             "devices": "Devices",
             "device": "Device"
         },
@@ -38,6 +40,9 @@
             "daysActive": "Select active days",
             "active": "Active",
             "all": "All",
+            "custom": "custom",
+            "sunrise": "sunrise",
+            "sunset": "sunset",
             "payloadWarning": "Invalid or no payload provided.",
             "emptyOverview": "Nothing planned yet. Click \"Overview\" and select a device.",
             "nothingPlanned": "Nothing planned yet. Click the plus sign to add a new timer.",

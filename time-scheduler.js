@@ -24,6 +24,7 @@ SOFTWARE.
 
 module.exports = function(RED) {
 	'use strict';
+	const sunCalc = require('suncalc');
 
 	function HTML(config) {
 		const uniqueId = config.id.replace(".", "");
@@ -43,7 +44,7 @@ module.exports = function(RED) {
 				color: var(--nr-dashboard-widgetTextColor);
 				border-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
 			}
-			#${divPrimary} md-select[disabled] md-select-value {
+			#${divPrimary} md-select[disabled] md-select-value, input[type="text"]:disabled {
 				color: var(--nr-dashboard-widgetTextColor);
 				opacity: 0.7;
 			}
@@ -145,7 +146,7 @@ module.exports = function(RED) {
 							`}
 						</div>
 					</md-subheader>
-					<md-list-item class="md-2-line" style="height: 80px; padding: 0 5px; border-left: 2px solid {{timer.disabled ? 'red' : 'transparent'}};" ng-repeat="timer in timers | filter:{ output: myDeviceSelect }:true track by $index">
+					<md-list-item class="md-2-line" style="height: 80px; padding: 0 5px; border-left: 2px solid {{timer.disabled ? 'red' : timer.startSolarEvent ? '#FCD440' : 'transparent'}};" ng-repeat="timer in timers | filter:{ output: myDeviceSelect }:true track by $index">
 						<div class="md-list-item-text" ng-click="showAddView(timers.indexOf(timer))" style="opacity:{{timer.disabled ? 0.4 : 1}};">
 							<div layout="row">
 								<span flex=""> {{$index+1}} </span>
@@ -173,47 +174,92 @@ module.exports = function(RED) {
 			</div>
 			<div id="addTimerView-${uniqueId}" style="display:none; position: relative;">
 				<form ng-submit="addTimer()" style="width: 100%; position: absolute;">
-					<div layout="row" style="max-height: 60px;">
-						<md-input-container flex="50">
-							<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.starttime")}</label>
-							<input id="timerStarttime-${uniqueId}" value="00:00" type="time" required pattern="^([0-1][0-9]|2[0-3]):([0-5][0-9])$">
-							<span class="validity"></span>
-						</md-input-container>
-						${config.eventMode ? `
-						<md-input-container flex="50">
-							<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.event")}</label>
-							${config.customPayload ? `
-							<input ng-model="formtimer.timerEvent" required autocomplete="off">
+					<div ng-show="!showSunSettings">
+						<div layout="row" layout-align="space-between none" style="max-height: 60px;">
+							<md-input-container flex="50" ng-show="formtimer.starttype === 'custom'" style="margin-left: 0">
+								<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.starttime")}</label>
+								<input id="timerStarttime-${uniqueId}" value="08:00" type="time" required pattern="^([0-1][0-9]|2[0-3]):([0-5][0-9])$">
+								<span class="validity"></span>
+							</md-input-container>
+							<md-input-container flex="50" ng-if="formtimer.starttype !== 'custom'" style="margin-left: 0">
+								<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.starttime")}</label>
+								<input ng-model="formtimer.solarStarttimeLabel" type="text" required disabled>
+								<span class="validity"></span>
+							</md-input-container>
+							${config.eventMode ? `
+							<md-input-container flex="">
+								<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.event")}</label>
+								${config.customPayload ? `
+								<input ng-model="formtimer.timerEvent" required autocomplete="off">
+								` : `
+								<md-select class="nr-dashboard-dropdown" ng-model="formtimer.timerEvent" required>
+									<md-option ng-repeat="option in eventOptions" value={{option.event}}> {{option.label}} </md-option>
+								</md-select>
+								`}
+							</md-input-container>
 							` : `
-							<md-select class="nr-dashboard-dropdown" ng-model="formtimer.timerEvent" required>
-								<md-option ng-repeat="option in eventOptions" value={{option.event}}> {{option.label}} </md-option>
-							</md-select>
+							<md-input-container flex="50" ng-show="formtimer.starttype === 'custom'">
+								<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.endtime")}</label>
+								<input id="timerEndtime-${uniqueId}" value="10:00" type="time" required pattern="^([0-1][0-9]|2[0-3]):([0-5][0-9])$">
+								<span class="validity"></span>
+							</md-input-container>
+							<md-input-container flex="50" ng-if="formtimer.starttype !== 'custom'">
+								<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.endtime")}</label>
+								<input ng-model="formtimer.solarEndtimeLabel" type="text" required disabled> </input>
+								<span class="validity"></span>
+							</md-input-container>
 							`}
-						</md-input-container>
-						` : `
-						<md-input-container flex="45">
-							<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.endtime")}</label>
-							<input id="timerEndtime-${uniqueId}" value="00:00" type="time" required pattern="^([0-1][0-9]|2[0-3]):([0-5][0-9])$">
-							<span class="validity"></span>
-						</md-input-container>
-						`}
+						</div>
+						<div layout="row" style="max-height: 50px;">
+							<md-input-container>
+								<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.daysActive")}</label>
+								<md-select class="nr-dashboard-dropdown" multiple="true" placeholder="${RED._("time-scheduler.ui.daysActive")}" ng-model="formtimer.dayselect">
+									<md-option ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="$index=$index+${config.startDay}" value={{$index}}> {{days[$index]}} </md-option>
+									<md-option ng-repeat="day in days | limitTo : -${config.startDay}" value={{$index}}> {{days[$index]}} </md-option>
+								</md-select>
+							</md-input-container>
+						</div>
+						<div layout="row" layout-align="space-between end" style="height: 40px;">
+							<md-button style="margin: 1px;" ng-if="formtimer.index !== undefined" ng-click="deleteTimer()"> <md-icon> delete </md-icon> </md-button>
+							<md-button style="margin: 1px;" ng-if="formtimer.index !== undefined" ng-click="formtimer.disabled=!formtimer.disabled">
+								<md-icon> {{formtimer.disabled ? "alarm_off" : "alarm_on"}} </md-icon>
+							</md-button>
+							<span ng-if="formtimer.index === undefined" style="width: 40px;"></span> <span ng-if="formtimer.index === undefined" style="width: 40px;"></span>
+							${config.solarEventsEnabled ? `<md-button style="margin: 1px;" aria-label="suntimer" ng-click="showSunSettings=!showSunSettings"> <md-icon> wb_sunny </md-icon> </md-button>`:``}
+							<md-button style="margin: 1px" type="submit"> <md-icon> done </md-icon> </md-button>
+						</div>
 					</div>
-					<div layout="row" style="max-height: 50px;">
-						<md-input-container>
-							<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.daysActive")}</label>
-							<md-select class="nr-dashboard-dropdown" multiple="true" placeholder="${RED._("time-scheduler.ui.daysActive")}" ng-model="formtimer.dayselect">
-								<md-option ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="$index=$index+${config.startDay}" value={{$index}}> {{days[$index]}} </md-option>
-								<md-option ng-repeat="day in days | limitTo : -${config.startDay}" value={{$index}}> {{days[$index]}} </md-option>
-							</md-select>
-						</md-input-container>
-					</div>
-					<div layout="row" layout-align="space-between end" style="height: 40px;">
-						<md-button style="margin: 1px;" ng-show="formtimer.index !== undefined" ng-click="deleteTimer()"> <md-icon> delete </md-icon> </md-button>
-						<md-button style="margin: 1px;" ng-show="formtimer.index !== undefined" ng-click="formtimer.disabled=!formtimer.disabled">
-							<md-icon> {{formtimer.disabled ? "alarm_off" : "alarm_on"}} </md-icon>
-						</md-button>
-						<span ng-show="formtimer.index === undefined"> </span>
-						<md-button style="margin: 1px" type="submit"> <md-icon> done </md-icon> </md-button>
+					<div ng-show="showSunSettings">
+						<div layout="row" style="height: 50px;">
+							<md-input-container>
+								<label style="color: var(--nr-dashboard-widgetTextColor)">Starttype</label>
+								<md-select class="nr-dashboard-dropdown" ng-model="formtimer.starttype" ng-change="updateSolarLabels()">
+									<md-option value="custom" selected> ${RED._("time-scheduler.ui.custom")} </md-option>
+									<md-option value="sunrise"> ${RED._("time-scheduler.ui.sunrise")} </md-option>
+									<md-option value="sunset"> ${RED._("time-scheduler.ui.sunset")} </md-option>
+								</md-select>
+							</md-input-container>
+							<md-input-container flex="40" ng-if="formtimer.starttype!='custom'">
+								<label style="color: var(--nr-dashboard-widgetTextColor)">Offset (min)</label>
+								<input type="number" ng-model="formtimer.startOffset" ng-change="offsetValidation('start')">
+							</md-input-container>
+						</div>
+						<div layout="row" style="height: 50px;">
+							<md-input-container ng-if="!${config.eventMode} && formtimer.starttype!='custom'">
+								<label style="color: var(--nr-dashboard-widgetTextColor)">Endtype</label>
+								<md-select class="nr-dashboard-dropdown" ng-model="formtimer.endtype" ng-change="updateSolarLabels()">
+									<md-option value="sunrise"> ${RED._("time-scheduler.ui.sunrise")} </md-option>
+									<md-option value="sunset"> ${RED._("time-scheduler.ui.sunset")} </md-option>
+								</md-select>
+							</md-input-container>
+							<md-input-container flex="40" ng-if="!${config.eventMode} && formtimer.starttype!='custom'">
+								<label style="color: var(--nr-dashboard-widgetTextColor)">Offset (min)</label>
+								<input type="number" ng-model="formtimer.endOffset" ng-change="offsetValidation('end')">
+							</md-input-container>
+						</div>
+						<div layout="row" layout-align="space-between end" style="height: 50px;">
+							<md-button style="margin: 1px;" aria-label="suntimer" ng-click="showSunSettings=!showSunSettings"> <md-icon> arrow_back </md-icon> </md-button>
+						</div>
 					</div>
 				</form>
 				<div ng-show="loading" layout="row" layout-align="center center" style="width:100%; position: absolute; z-index:10; opacity: 0.9; height:150px; background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);">
@@ -257,6 +303,7 @@ module.exports = function(RED) {
 			if (!config.hasOwnProperty("eventOptions")) config.eventOptions = [{label: RED._("time-scheduler.label.on"), event: "true"}, {label: RED._("time-scheduler.label.off"), event: "false"}];
 			// END check props
 			config.i18n = RED._("time-scheduler.ui", { returnObjects: true });
+			config.solarEventsEnabled = ((config.lat !== "" && isFinite(config.lat) && Math.abs(config.lat) <= 90) && (config.lon !== "" && isFinite(config.lon) && Math.abs(config.lon) <= 180)) ? true : false;
 
 			if (checkConfig(config, node)) {
 				const done = ui.addWidget({
@@ -362,11 +409,14 @@ module.exports = function(RED) {
 
 						$scope.showAddView = function(timerIndex) {
 							$scope.isEditMode = true;
+							$scope.showSunSettings = false;
 							$scope.getElement("timersView").style.display = "none";
 							$scope.getElement("messageBoard").style.display = "none";
 							$scope.getElement("addTimerView").style.display = "block";
 							$scope.formtimer = {index: timerIndex};
 							$scope.formtimer.dayselect = [];
+							$scope.formtimer.starttype = "custom";
+							$scope.formtimer.endtype = "sunset";
 
 							if (timerIndex === undefined) {
 								const today = new Date();
@@ -382,6 +432,11 @@ module.exports = function(RED) {
 								$scope.formtimer.disabled = false;
 							} else {
 								const timer = $scope.timers[timerIndex];
+								if (timer.hasOwnProperty("startSolarEvent")) $scope.formtimer.starttype = timer.startSolarEvent;
+								if (timer.hasOwnProperty("startSolarOffset")) $scope.formtimer.startOffset = timer.startSolarOffset;
+								if (timer.hasOwnProperty("endSolarEvent")) $scope.formtimer.endtype = timer.endSolarEvent;
+								if (timer.hasOwnProperty("startSolarOffset")) $scope.formtimer.endOffset = timer.endSolarOffset;
+								$scope.updateSolarLabels();
 								const start = new Date(timer.starttime);
 								$scope.getElement("timerStarttime").value = $scope.formatTime(start.getHours(), start.getMinutes());
 								if ($scope.eventMode) $scope.formtimer.timerEvent = timer.event;
@@ -407,6 +462,11 @@ module.exports = function(RED) {
 								output : $scope.myDeviceSelect
 							};
 
+							if ($scope.formtimer.starttype !== "custom") {
+								timer.startSolarEvent = $scope.formtimer.starttype;
+								timer.startSolarOffset = $scope.formtimer.startOffset;
+							}
+
 							if ($scope.eventMode) {
 								timer.event = $scope.formtimer.timerEvent;
 								if (timer.event === "true" || timer.event === true) {
@@ -421,7 +481,14 @@ module.exports = function(RED) {
 								let endtime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endInput[0], endInput[1], 0, 0).getTime();
 								if (endInput[0] === "00" && endInput[1] === "00") endtime += 24*60*60*1000;
 
-								if ($scope.diff(starttime, endtime) < 1) {
+								if ($scope.formtimer.starttype !== "custom") {
+									timer.endSolarEvent = $scope.formtimer.endtype;
+									timer.endSolarOffset = $scope.formtimer.endOffset;
+									if (timer.startSolarEvent === timer.endSolarEvent && (timer.startSolarOffset || 0) >= (timer.endSolarOffset || 0)) {
+										alert($scope.i18n.alertTimespan);
+										return;
+									}
+								} else if ($scope.diff(starttime, endtime) < 1) {
 									alert($scope.i18n.alertTimespan);
 									return;
 								}
@@ -443,11 +510,6 @@ module.exports = function(RED) {
 								$scope.timers.splice(timerIndex,1,timer);
 							}
 
-							$scope.timers.sort(function(a, b) {
-								const millisA = $scope.getNowWithCustomTime(a.starttime);
-								const millisB = $scope.getNowWithCustomTime(b.starttime);
-								return millisA - millisB;
-							});
 							$scope.sendTimersToOutput();
 						}
 
@@ -483,13 +545,24 @@ module.exports = function(RED) {
 							return $scope.padZero(hours) + ":" + $scope.padZero(minutes);
 						}
 
-						$scope.getNowWithCustomTime = function(timeInMillis) {
-							const date = new Date();
-							const origDate = new Date(timeInMillis);
-							date.setHours(origDate.getHours());
-							date.setMinutes(origDate.getMinutes());
-							date.setSeconds(0); date.setMilliseconds(0);
-							return date.getTime();
+						$scope.updateSolarLabels = function() {
+							const startOffset = $scope.formtimer.startOffset > 0 ? "+" + $scope.formtimer.startOffset : ($scope.formtimer.startOffset || 0);
+							const startTypeLabel = startOffset === 0 ? $scope.i18n[$scope.formtimer.starttype] : $scope.i18n[$scope.formtimer.starttype].substr(0,8);
+							$scope.formtimer.solarStarttimeLabel = startTypeLabel + (startOffset != 0 ? " " + startOffset + "m" : "");
+							const endOffset = $scope.formtimer.endOffset > 0 ? "+" + $scope.formtimer.endOffset : ($scope.formtimer.endOffset || 0);
+							const endTypeLabel = endOffset === 0 ? $scope.i18n[$scope.formtimer.endtype] : $scope.i18n[$scope.formtimer.endtype].substr(0,8);
+							$scope.formtimer.solarEndtimeLabel = endTypeLabel + (endOffset != 0 ? " " + endOffset + "m" : "");
+						}
+
+						$scope.offsetValidation = function(type) {
+							if (type === "start") {
+								if ($scope.formtimer.startOffset > 300) $scope.formtimer.startOffset = 300;
+								if ($scope.formtimer.startOffset < -300) $scope.formtimer.startOffset = -300;
+							} else if (type === "end") {
+								if ($scope.formtimer.endOffset > 300) $scope.formtimer.endOffset = 300;
+								if ($scope.formtimer.endOffset < -300) $scope.formtimer.endOffset = -300;
+							}
+							$scope.updateSolarLabels();
 						}
 
 						$scope.localDayToUtc = function(timer, localDay) {
@@ -593,7 +666,12 @@ module.exports = function(RED) {
 				}
 
 				function getTimers() {
-					return node.context().get('timers') || [];
+					const timers = node.context().get('timers') || [];
+					return updateSolarEvents(timers).sort(function(a, b) {
+						const millisA = getNowWithCustomTime(a.starttime);
+						const millisB = getNowWithCustomTime(b.starttime);
+						return millisA - millisB;
+					});
 				}
 
 				function setTimers(timers) {
@@ -727,6 +805,38 @@ module.exports = function(RED) {
 					if (utcDay < 0) utcDay = 6;
 					if (utcDay > 6) utcDay = 0;
 					return utcDay;
+				}
+
+				function getNowWithCustomTime(timeInMillis) {
+					const date = new Date();
+					const origDate = new Date(timeInMillis);
+					date.setHours(origDate.getHours());
+					date.setMinutes(origDate.getMinutes());
+					date.setSeconds(0); date.setMilliseconds(0);
+					return date.getTime();
+				}
+
+				function updateSolarEvents(timers) {
+					if (config.solarEventsEnabled) {
+						const sunTimes = sunCalc.getTimes(new Date(), config.lat, config.lon);
+						return timers.map(t => {
+							if (t.hasOwnProperty("startSolarEvent")) {
+								const offset = t.startSolarOffset || 0;
+								const solarTime = sunTimes[t.startSolarEvent];
+								t.starttime = solarTime.getTime() + (offset*60*1000);
+							}
+							if (t.hasOwnProperty("endSolarEvent")) {
+								const offset = t.endSolarOffset || 0;
+								const solarTime = sunTimes[t.endSolarEvent];
+								t.endtime = solarTime.getTime() + (offset*60*1000);
+								if (t.startSolarEvent === 'sunset' && t.endSolarEvent === 'sunrise')
+									t.endtime+=24*60*60*1000;
+							}
+							return t;
+						});
+					} else {
+						return timers.filter(t => !t.hasOwnProperty("startSolarEvent") && !t.hasOwnProperty("endSolarEvent"));
+					}
 				}
 
 				function getNodeData() {
