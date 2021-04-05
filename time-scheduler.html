@@ -80,6 +80,12 @@ SOFTWARE.
         <span data-i18n="time-scheduler.topicDesc"></span>
     </div>
     <div class="form-row">
+		<label for="node-input-lat"><i class="fa fa-globe"></i> <span data-i18n="time-scheduler.label.latitude"></span> </label>
+		<input type="number" id="node-input-lat" min="-90" max="90" step="any" placeholder="48.3069" style="width:25%; margin-right: 6px;">
+		<label for="node-input-lon"><i class="fa fa-globe"></i> <span data-i18n="time-scheduler.label.longitude"></span> </label>
+		<input type="number" id="node-input-lon" min="-180" max="180" step="any" placeholder="14.2858" style="width:25%">
+	</div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="time-scheduler.label.name"></span> </label>
         <input type="text" id="node-input-name">
     </div>
@@ -100,6 +106,8 @@ SOFTWARE.
             eventMode: {value: false},
             eventOptions: {value: [{label: RED._("time-scheduler.label.on"), event: "true"}, {label: RED._("time-scheduler.label.off"), event: "false"}] },
             sendTopic: {value: false},
+            lat: {value: false},
+            lon: {value: false},
             outputs: {value: 2},
             order: {value: 0},
             width: {

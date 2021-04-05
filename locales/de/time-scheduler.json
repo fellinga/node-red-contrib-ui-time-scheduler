@@ -17,6 +17,8 @@
             "off": "Aus",
             "eventMode": "Event Modus",
             "eventOptions": "Events",
+            "latitude": "Breitengrad",
+            "longitude": "Längengrad",
             "devices": "Geräte",
             "device": "Gerät"
         },
@@ -38,6 +40,9 @@
             "daysActive": "Wähle aktive Tage",
             "active": "Aktive",
             "all": "Alle",
+            "custom": "Benutzerdefiniert",
+            "sunrise": "Sonnenaufgang",
+            "sunset": "Sonnenuntergang",
             "payloadWarning": "Fehlerhafte oder keine Daten erhalten.",
             "emptyOverview": "Noch nichts geplant. Klicke auf \"Übersicht\" und wähle eines der Geräte.",
             "nothingPlanned": "Noch nichts geplant. Klicke auf das Plus Symbol um einen neuen Zeitplan zu erstellen.",
