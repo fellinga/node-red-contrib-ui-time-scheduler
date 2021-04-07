@@ -1,1 +1,1 @@
-{"timers":[{"starttime":25200000,"endtime":28800000,"days":[0,1,1,1,1,0,0],"output":0},{"starttime":32400000,"endtime":50400000,"days":[1,0,0,0,0,1,1],"output":0}]}
+{"timers":[{"starttime":1617778800000,"days":[1,0,0,0,0,1,1],"output":"0","endtime":1617793200000},{"starttime":1617800400000,"days":[0,1,1,1,1,0,0],"output":"0","endtime":1617822000000}],"settings":{"disabledDevices":[]}}
