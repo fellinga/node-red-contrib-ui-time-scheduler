@@ -1,6 +1,15 @@
 # Changelog
 
 ----------
+## [v1.10.2] - 2021-04-23
+
+### new
+- added getStatus input
+
+### fixed
+- fixup empty ui path
+  
+----------
 ## [v1.10.1] - 2021-04-05
 
 ### fixed
