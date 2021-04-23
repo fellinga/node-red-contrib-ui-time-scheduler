@@ -329,6 +329,10 @@ module.exports = function(RED) {
 								msg.payload = serializeData();
 								node.send(msg);
 							}
+						} else if (msg.hasOwnProperty("getStatus")) {
+							msg.payload = serializeData();
+							node.send(msg);
+							return msg;
 						} else {
 							try {
 								const parsedInput = JSON.parse(value);
@@ -868,7 +872,8 @@ module.exports = function(RED) {
 	}
 	RED.nodes.registerType("ui_time_scheduler",TimeSchedulerNode);
 
-	const uiPath = ((RED.settings.ui || {}).path) || 'ui';
+	let uiPath = ((RED.settings.ui || {}).path);
+	if (uiPath == undefined) uiPath = 'ui';
 	let nodePath = '/' + uiPath + '/time-scheduler/getNode/:nodeId';
 	nodePath = nodePath.replace(/\/+/g, '/');
 
