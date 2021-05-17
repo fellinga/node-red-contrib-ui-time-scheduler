@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.11.0] - 2021-05-17
+
+### new
+- added select all for day select
+  
+----------
 ## [v1.10.2] - 2021-04-23
 
 ### new

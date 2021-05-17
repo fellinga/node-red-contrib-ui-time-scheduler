@@ -213,7 +213,8 @@ module.exports = function(RED) {
 						<div layout="row" style="max-height: 50px;">
 							<md-input-container>
 								<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.daysActive")}</label>
-								<md-select class="nr-dashboard-dropdown" multiple="true" placeholder="${RED._("time-scheduler.ui.daysActive")}" ng-model="formtimer.dayselect">
+								<md-select class="nr-dashboard-dropdown" multiple="true" placeholder="${RED._("time-scheduler.ui.daysActive")}" ng-model="formtimer.dayselect" ng-change="daysChanged()" >
+									<md-option value="all"><em>${RED._("time-scheduler.ui.selectAll")}</em></md-option>
 									<md-option ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="$index=$index+${config.startDay}" value={{$index}}> {{days[$index]}} </md-option>
 									<md-option ng-repeat="day in days | limitTo : -${config.startDay}" value={{$index}}> {{days[$index]}} </md-option>
 								</md-select>
@@ -529,6 +530,12 @@ module.exports = function(RED) {
 								disabledDevices: angular.copy($scope.disabledDevices)
 							};
 							$scope.send([$scope.msg[0]]);
+						}
+
+						$scope.daysChanged = function() {
+							if ($scope.formtimer.dayselect.includes('all')) {
+								$scope.formtimer.dayselect = [0,1,2,3,4,5,6];
+							};
 						}
 
 						$scope.minutesToReadable = function(minutes) {
