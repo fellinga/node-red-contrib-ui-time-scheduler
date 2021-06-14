@@ -1,9 +1,9 @@
 # node-red-contrib-ui-time-scheduler
 A node-red-ui time scheduler for the Node-RED Dashboard.  
 
-![](images/time-scheduler.jpg) | ![](images/time-scheduler-em.jpg)
-:--: | :--:
-*Default Mode* | *Event Mode*
+| ![](images/time-scheduler.jpg) | ![](images/time-scheduler-em.jpg) |
+| :----------------------------: | :-------------------------------: |
+|         *Default Mode*         |           *Event Mode*            |
 
 ## Install
   

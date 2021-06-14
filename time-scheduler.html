@@ -96,35 +96,36 @@ SOFTWARE.
         category: 'dashboard',
         color: 'rgb( 63, 173, 181)',
         defaults: {
-            group: {type: 'ui_group', required:true},
-            name: {value: ''},
-            startDay: {value: 0},
-            refresh: {value: 60},
-            devices: {value: ["Device 1"]},
-            onlySendChange: {value: false},
-            customPayload: {value: false},
-            eventMode: {value: false},
-            eventOptions: {value: [{label: RED._("time-scheduler.label.on"), event: "true"}, {label: RED._("time-scheduler.label.off"), event: "false"}] },
-            sendTopic: {value: false},
-            lat: {value: ''},
-            lon: {value: ''},
-            outputs: {value: 2},
-            order: {value: 0},
+            group: { type: 'ui_group', required: true },
+            name: { value: '' },
+            startDay: { value: 0 },
+            refresh: { value: 60 },
+            devices: { value: ["Device 1"] },
+            onlySendChange: { value: false },
+            customPayload: { value: false },
+            eventMode: { value: false },
+            eventOptions: { value: [{ label: RED._("time-scheduler.label.on"), event: "true" }, { label: RED._("time-scheduler.label.off"), event: "false" }] },
+            sendTopic: { value: false },
+            lat: { value: '' },
+            lon: { value: '' },
+            outputs: { value: 2 },
+            order: { value: 0 },
             width: {
                 value: 0,
                 validate: function(v) {
                     let valid = true
-                    const width = v||0;
-                    const currentGroup = $('#node-input-group').val()|| this.group;
+                    const width = v || 0;
+                    const currentGroup = $('#node-input-group').val() || this.group;
                     const groupNode = RED.nodes.node(currentGroup);
                     valid = !groupNode || +width <= +groupNode.width;
-                    $("#node-input-size").toggleClass("input-error",!valid);
+                    $("#node-input-size").toggleClass("input-error", !valid);
                     return valid;
-                }},
-            height: {value: 0}
+                }
+            },
+            height: { value: 0 }
         },
-        inputs:1,
-        outputs:2,
+        inputs: 1,
+        outputs: 2,
         icon: "calendar.png",
         paletteLabel: "ui scheduler",
         label: function() { return this.name || "ui scheduler"; },
@@ -165,61 +166,61 @@ SOFTWARE.
                 }
             });
 
-            $("#node-input-device-container").css('min-height','165px').editableList({
+            $("#node-input-device-container").css('min-height', '165px').editableList({
                 addItem: function(row, index, data) {
-                    const current = node._("time-scheduler.label.device") + " " + (index+1);
-                    
-                    const label = $('<span/>', {class:"node-input-device-label", text:" " + current});
-                    $(row).html(label);
-                    
-                    const nameInput = $('<input/>',{class:"node-input-device-name",type:"text",style:"margin-left:7px; width:calc(75% - 32px);", value:data.name || current});
-                    nameInput.appendTo(row).typedInput({default:'str',types:['str']});
+                    const current = node._("time-scheduler.label.device") + " " + (index + 1);
 
-                    const finalspan = $('<span/>',{style:"float: right;margin-top: 6px;"}).appendTo(row);
-                    finalspan.append(' &#8594; <span class="node-input-device-index">'+(index+1)+'</span> ');
+                    const label = $('<span/>', { class: "node-input-device-label", text: " " + current });
+                    $(row).html(label);
+
+                    const nameInput = $('<input/>', { class: "node-input-device-name", type: "text", style: "margin-left:7px; width:calc(75% - 32px);", value: data.name || current });
+                    nameInput.appendTo(row).typedInput({ default: 'str', types: ['str'] });
+
+                    const finalspan = $('<span/>', { style: "float: right;margin-top: 6px;" }).appendTo(row);
+                    finalspan.append(' &#8594; <span class="node-input-device-index">' + (index + 1) + '</span> ');
                 },
                 removeItem: function(opt) {
                     const devices = $("#node-input-device-container").editableList('items');
                     devices.each(function(i) {
-                        $(this).find(".node-input-device-label").html(node._("time-scheduler.label.device") + " " + (i+1));
+                        $(this).find(".node-input-device-label").html(node._("time-scheduler.label.device") + " " + (i + 1));
                         const name = $(this).find(".node-input-device-name").typedInput('value');
                         const regex = new RegExp("^" + node._("time-scheduler.label.device") + " \\d+$")
                         if (regex.test(name)) {
-                            $(this).find(".node-input-device-name").typedInput('value', node._("time-scheduler.label.device") + " " + (i+1));
+                            $(this).find(".node-input-device-name").typedInput('value', node._("time-scheduler.label.device") + " " + (i + 1));
                         }
-                        $(this).find(".node-input-device-index").html(i+1);
+                        $(this).find(".node-input-device-index").html(i + 1);
                     });
 
-                    if (devices.length === 0) $("#node-input-device-container").editableList('addItem',{});
+                    if (devices.length === 0) $("#node-input-device-container").editableList('addItem', {});
                 },
                 sortItems: function(rules) {
                     const devices = $("#node-input-device-container").editableList('items');
                     devices.each(function(i) {
-                        $(this).find(".node-input-device-label").html(node._("time-scheduler.label.device") + " " + (i+1));
+                        $(this).find(".node-input-device-label").html(node._("time-scheduler.label.device") + " " + (i + 1));
                         const name = $(this).find(".node-input-device-name").typedInput('value');
                         const regex = new RegExp("^" + node._("time-scheduler.label.device") + " \\d+$")
                         if (regex.test(name)) {
-                            $(this).find(".node-input-device-name").typedInput('value', node._("time-scheduler.label.device") + " " + (i+1));
+                            $(this).find(".node-input-device-name").typedInput('value', node._("time-scheduler.label.device") + " " + (i + 1));
                         }
-                        $(this).find(".node-input-device-index").html(i+1);
+                        $(this).find(".node-input-device-index").html(i + 1);
                     });
                 },
                 removable: true,
                 sortable: true
             });
 
-            $("#node-input-eventOption-container").css('min-height','115px').editableList({
+            $("#node-input-eventOption-container").css('min-height', '115px').editableList({
                 addItem: function(row, index, option) {
                     $(row).html('<span/>');
-                    const labelField = $('<input/>',{class:"node-input-eventOption-label",type:"text",style:"margin-left:7px; width:calc(50% - 32px);", placeholder: 'Label', value:option.label});
+                    const labelField = $('<input/>', { class: "node-input-eventOption-label", type: "text", style: "margin-left:7px; width:calc(50% - 32px);", placeholder: 'Label', value: option.label });
                     labelField.appendTo(row);
-                    const eventField = $('<input/>',{class:"node-input-eventOption-event",type:"text",style:"margin-left:7px; width:calc(50% - 32px);", placeholder: 'Payload',value:option.event});
-                    eventField.appendTo(row).typedInput({default:'str',types:['str']});
+                    const eventField = $('<input/>', { class: "node-input-eventOption-event", type: "text", style: "margin-left:7px; width:calc(50% - 32px);", placeholder: 'Payload', value: option.event });
+                    eventField.appendTo(row).typedInput({ default: 'str', types: ['str'] });
                 },
                 removeItem: function(opt) {
                     if ($("#node-input-eventOption-container").editableList('items').length === 0) {
-                        $("#node-input-eventOption-container").editableList('addItem', {label: node._("time-scheduler.label.on"), event: "true"});
-                        $("#node-input-eventOption-container").editableList('addItem', {label: node._("time-scheduler.label.off"), event: "false"});
+                        $("#node-input-eventOption-container").editableList('addItem', { label: node._("time-scheduler.label.on"), event: "true" });
+                        $("#node-input-eventOption-container").editableList('addItem', { label: node._("time-scheduler.label.off"), event: "false" });
                     }
                 },
                 removable: true,
@@ -229,38 +230,38 @@ SOFTWARE.
             if (!this.startDay) $("#node-input-startDay").val(0).change();
             if (!this.refresh) $("#node-input-refresh").val(60);
             if (!this.devices) {
-                $("#node-input-device-container").editableList('addItem',{name:this.name});
+                $("#node-input-device-container").editableList('addItem', { name: this.name });
             } else {
-                for (let i=0;i<this.devices.length;i++) {
-                    $("#node-input-device-container").editableList('addItem',{name:this.devices[i]});
+                for (let i = 0; i < this.devices.length; i++) {
+                    $("#node-input-device-container").editableList('addItem', { name: this.devices[i] });
                 }
             }
             if (!this.eventOptions || this.eventOptions.length === 0) {
-                $("#node-input-eventOption-container").editableList('addItem', {label: node._("time-scheduler.label.on"), event: "true"});
-                $("#node-input-eventOption-container").editableList('addItem', {label: node._("time-scheduler.label.off"), event: "false"});
+                $("#node-input-eventOption-container").editableList('addItem', { label: node._("time-scheduler.label.on"), event: "true" });
+                $("#node-input-eventOption-container").editableList('addItem', { label: node._("time-scheduler.label.off"), event: "false" });
             } else {
-                for (let i=0;i<this.eventOptions.length;i++) {
-                    $("#node-input-eventOption-container").editableList('addItem',{label:this.eventOptions[i].label, event: this.eventOptions[i].event});
+                for (let i = 0; i < this.eventOptions.length; i++) {
+                    $("#node-input-eventOption-container").editableList('addItem', { label: this.eventOptions[i].label, event: this.eventOptions[i].event });
                 }
             }
         },
         oneditsave: function() {
             const node = this;
-            
+
             node.devices = [];
             const devices = $("#node-input-device-container").editableList('items');
             devices.each(function(i) {
                 const device = $(this);
                 let deviceName = device.find(".node-input-device-name").typedInput('value');
-                deviceName = deviceName === "" ? node._("time-scheduler.label.device") + " " + (i+1) : deviceName;
+                deviceName = deviceName === "" ? node._("time-scheduler.label.device") + " " + (i + 1) : deviceName;
                 while (node.devices.includes(deviceName)) {
-                    deviceName = deviceName+"_"+node._("time-scheduler.copy");
+                    deviceName = deviceName + "_" + node._("time-scheduler.copy");
                 }
                 node.devices.push(deviceName);
             });
 
             node.eventOptions = [];
-            if ($("#node-input-eventMode").prop("checked") && !$("#node-input-customPayload").prop("checked"))  {
+            if ($("#node-input-eventMode").prop("checked") && !$("#node-input-customPayload").prop("checked")) {
                 const eventOptions = $("#node-input-eventOption-container").editableList('items');
                 eventOptions.each(function(i) {
                     const option = $(this);

@@ -1,5 +1,5 @@
 {
-    "time-scheduler" : {
+    "time-scheduler": {
         "payloadReceived": "Payload received.",
         "invalidPayload": "Payload invalid.",
         "contextCreated": "Context created.",
@@ -12,7 +12,7 @@
             "startDay": "First Day",
             "block": "Block",
             "refresh": "Refresh",
-            "customPayload" : "User Events",
+            "customPayload": "User Events",
             "on": "On",
             "off": "Off",
             "eventMode": "Event Mode",
@@ -22,13 +22,21 @@
             "devices": "Devices",
             "device": "Device"
         },
-        "days": ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+        "days": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+        ],
         "customPayloadDesc": "Accept free-form frontend input for events",
         "eventModeDesc": "Schedule single events rather than a time span",
         "onlySendChangeDesc": "Block device output unless value changes",
         "topicDesc": "Send the device name via msg.topic",
         "copy": "copy",
-        "ui" : {
+        "ui": {
             "start": "Start",
             "starttime": "Starttime",
             "end": "End",
@@ -36,7 +44,15 @@
             "event": "Event",
             "duration": "Duration",
             "overview": "Overview",
-            "days": ["SU","MO","TU","WE","TH","FR","SA"],
+            "days": [
+                "SU",
+                "MO",
+                "TU",
+                "WE",
+                "TH",
+                "FR",
+                "SA"
+            ],
             "daysActive": "Select active days",
             "active": "Active",
             "all": "All",

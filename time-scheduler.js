@@ -29,11 +29,11 @@ module.exports = function(RED) {
 	function HTML(config) {
 		const uniqueId = config.id.replace(".", "");
 		const divPrimary = "ui-ts-" + uniqueId;
-		
+
 		const styles = String.raw`
 		<style>
 			#${divPrimary} {
-				height: ${86 + (config.height*80)}px;
+				height: ${86 + (config.height * 80)}px;
 				padding-left: 6px;
 				padding-right: 7px;
 			}
@@ -226,7 +226,7 @@ module.exports = function(RED) {
 								<md-icon> {{formtimer.disabled ? "alarm_off" : "alarm_on"}} </md-icon>
 							</md-button>
 							<span ng-if="formtimer.index === undefined" style="width: 40px;"></span> <span ng-if="formtimer.index === undefined" style="width: 40px;"></span>
-							${config.solarEventsEnabled ? `<md-button style="margin: 1px;" aria-label="suntimer" ng-click="showSunSettings=!showSunSettings"> <md-icon> wb_sunny </md-icon> </md-button>`:``}
+							${config.solarEventsEnabled ? `<md-button style="margin: 1px;" aria-label="suntimer" ng-click="showSunSettings=!showSunSettings"> <md-icon> wb_sunny </md-icon> </md-button>` : ``}
 							<md-button style="margin: 1px" type="submit"> <md-icon> done </md-icon> </md-button>
 						</div>
 					</div>
@@ -288,11 +288,11 @@ module.exports = function(RED) {
 	function TimeSchedulerNode(config) {
 		try {
 			let ui = undefined;
-			if(ui === undefined) {
+			if (ui === undefined) {
 				ui = RED.require("node-red-dashboard")(RED);
 			}
 
-			RED.nodes.createNode(this,config);
+			RED.nodes.createNode(this, config);
 			const node = this;
 
 			// START check props
@@ -301,7 +301,7 @@ module.exports = function(RED) {
 			if (!config.hasOwnProperty("height") || config.height == 0) config.height = 1;
 			if (!config.hasOwnProperty("name") || config.name === "") config.name = "Time-Scheduler";
 			if (!config.hasOwnProperty("devices") || config.devices.length === 0) config.devices = [config.name];
-			if (!config.hasOwnProperty("eventOptions")) config.eventOptions = [{label: RED._("time-scheduler.label.on"), event: "true"}, {label: RED._("time-scheduler.label.off"), event: "false"}];
+			if (!config.hasOwnProperty("eventOptions")) config.eventOptions = [{ label: RED._("time-scheduler.label.on"), event: "true" }, { label: RED._("time-scheduler.label.off"), event: "false" }];
 			// END check props
 			config.i18n = RED._("time-scheduler.ui", { returnObjects: true });
 			config.solarEventsEnabled = ((config.lat !== "" && isFinite(config.lat) && Math.abs(config.lat) <= 90) && (config.lon !== "" && isFinite(config.lon) && Math.abs(config.lon) <= 180)) ? true : false;
@@ -316,17 +316,17 @@ module.exports = function(RED) {
 					emitOnlyNewValues: false,
 					forwardInputMessages: false,
 					storeFrontEndInputAsState: true,
-					persistantFrontEndValue : true,
-					beforeEmit: function (msg, value) {
+					persistantFrontEndValue: true,
+					beforeEmit: function(msg, value) {
 						if (msg.hasOwnProperty("disableDevice")) {
 							if (addDisabledDevice(msg.disableDevice)) {
-								node.status({fill:"green",shape:"ring",text: msg.disableDevice + " " + RED._("time-scheduler.disabled")});
+								node.status({ fill: "green", shape: "ring", text: msg.disableDevice + " " + RED._("time-scheduler.disabled") });
 								msg.payload = serializeData();
 								node.send(msg);
 							}
 						} else if (msg.hasOwnProperty("enableDevice")) {
 							if (removeDisabledDevice(msg.enableDevice)) {
-								node.status({fill:"green",shape:"dot",text: msg.enableDevice + " " + RED._("time-scheduler.enabled")});
+								node.status({ fill: "green", shape: "dot", text: msg.enableDevice + " " + RED._("time-scheduler.enabled") });
 								msg.payload = serializeData();
 								node.send(msg);
 							}
@@ -337,27 +337,27 @@ module.exports = function(RED) {
 						} else {
 							try {
 								const parsedInput = JSON.parse(value);
-								
+
 								const parsedTimers = parsedInput.timers;
 								if (validateTimers(parsedTimers)) {
-									node.status({fill:"green",shape:"dot",text:"time-scheduler.payloadReceived"});
+									node.status({ fill: "green", shape: "dot", text: "time-scheduler.payloadReceived" });
 									setTimers(parsedTimers.filter(timer => timer.output < config.devices.length));
 								} else {
-									node.status({fill:"yellow",shape:"dot",text:"time-scheduler.invalidPayload"});
+									node.status({ fill: "yellow", shape: "dot", text: "time-scheduler.invalidPayload" });
 								}
 
 								const parsedSettings = parsedInput.settings;
 								if (parsedSettings && parsedSettings.disabledDevices) {
 									setDisabledDevices(parsedSettings.disabledDevices);
 								}
-							} catch(e) {
-								node.status({fill:"red",shape:"dot",text: e.toString()});
+							} catch (e) {
+								node.status({ fill: "red", shape: "dot", text: e.toString() });
 							}
 						}
 
-						return {msg: [msg]};
+						return { msg: [msg] };
 					},
-					beforeSend: function (msg, orig) {
+					beforeSend: function(msg, orig) {
 						node.status({});
 						if (orig && orig.msg[0]) {
 							setTimers(orig.msg[0].payload.timers);
@@ -368,8 +368,8 @@ module.exports = function(RED) {
 							return sendMsg;
 						}
 					},
-					initController: function ($scope) {
-						$scope.init = function (config) {
+					initController: function($scope) {
+						$scope.init = function(config) {
 							$scope.nodeId = config.id;
 							$scope.i18n = config.i18n;
 							$scope.days = config.i18n.days;
@@ -418,7 +418,7 @@ module.exports = function(RED) {
 							$scope.getElement("timersView").style.display = "none";
 							$scope.getElement("messageBoard").style.display = "none";
 							$scope.getElement("addTimerView").style.display = "block";
-							$scope.formtimer = {index: timerIndex};
+							$scope.formtimer = { index: timerIndex };
 							$scope.formtimer.dayselect = [];
 							$scope.formtimer.starttype = "custom";
 							$scope.formtimer.endtype = "sunset";
@@ -426,11 +426,11 @@ module.exports = function(RED) {
 							if (timerIndex === undefined) {
 								const today = new Date();
 								if (today.getHours() == "23" && today.getMinutes() >= "54") today.setMinutes(53);
-								const start = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+1, 0);
+								const start = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes() + 1, 0);
 								$scope.getElement("timerStarttime").value = $scope.formatTime(start.getHours(), start.getMinutes());
 								if ($scope.eventMode) $scope.formtimer.timerEvent = $scope.eventOptions.length > 0 ? $scope.eventOptions[0].event : "true";
 								else {
-									const end = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes()+6, 0);
+									const end = new Date(today.getFullYear(), today.getMonth(), today.getDay(), today.getHours(), today.getMinutes() + 6, 0);
 									$scope.getElement("timerEndtime").value = $scope.formatTime(end.getHours(), end.getMinutes());
 								}
 								$scope.formtimer.dayselect.push(today.getDay());
@@ -450,7 +450,7 @@ module.exports = function(RED) {
 									$scope.getElement("timerEndtime").value = $scope.formatTime(end.getHours(), end.getMinutes());
 								}
 								for (let i = 0; i < timer.days.length; i++) {
-									if (timer.days[$scope.localDayToUtc(timer,i)]) $scope.formtimer.dayselect.push(i);
+									if (timer.days[$scope.localDayToUtc(timer, i)]) $scope.formtimer.dayselect.push(i);
 								}
 								$scope.formtimer.disabled = timer.hasOwnProperty("disabled");
 							}
@@ -463,8 +463,8 @@ module.exports = function(RED) {
 
 							const timer = {
 								starttime: starttime,
-								days : [0,0,0,0,0,0,0],
-								output : $scope.myDeviceSelect
+								days: [0, 0, 0, 0, 0, 0, 0],
+								output: $scope.myDeviceSelect
 							};
 
 							if ($scope.formtimer.starttype !== "custom") {
@@ -478,13 +478,13 @@ module.exports = function(RED) {
 									timer.event = true;
 								} else if (timer.event === "false" || timer.event === false) {
 									timer.event = false;;
-								} else if (!isNaN(timer.event) && (timer.event+"").charAt(0) != "0") {
+								} else if (!isNaN(timer.event) && (timer.event + "").charAt(0) != "0") {
 									timer.event = Number(timer.event);
 								}
 							} else {
 								const endInput = $scope.getElement("timerEndtime").value.split(":");
 								let endtime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endInput[0], endInput[1], 0, 0).getTime();
-								if (endInput[0] === "00" && endInput[1] === "00") endtime += 24*60*60*1000;
+								if (endInput[0] === "00" && endInput[1] === "00") endtime += 24 * 60 * 60 * 1000;
 
 								if ($scope.formtimer.starttype !== "custom") {
 									timer.endSolarEvent = $scope.formtimer.endtype;
@@ -512,21 +512,21 @@ module.exports = function(RED) {
 							if (timerIndex === undefined) {
 								$scope.timers.push(timer);
 							} else {
-								$scope.timers.splice(timerIndex,1,timer);
+								$scope.timers.splice(timerIndex, 1, timer);
 							}
 
 							$scope.sendTimersToOutput();
 						}
 
 						$scope.deleteTimer = function() {
-							$scope.timers.splice($scope.formtimer.index,1);
+							$scope.timers.splice($scope.formtimer.index, 1);
 							$scope.sendTimersToOutput();
 						}
 
 						$scope.sendTimersToOutput = function() {
-							if (!$scope.msg) $scope.msg = [{payload: ""}];
+							if (!$scope.msg) $scope.msg = [{ payload: "" }];
 							$scope.msg[0].payload = {
-								timers: angular.copy($scope.timers), 
+								timers: angular.copy($scope.timers),
 								disabledDevices: angular.copy($scope.disabledDevices)
 							};
 							$scope.send([$scope.msg[0]]);
@@ -534,12 +534,12 @@ module.exports = function(RED) {
 
 						$scope.daysChanged = function() {
 							if ($scope.formtimer.dayselect.includes('all')) {
-								$scope.formtimer.dayselect = [0,1,2,3,4,5,6];
+								$scope.formtimer.dayselect = [0, 1, 2, 3, 4, 5, 6];
 							};
 						}
 
 						$scope.minutesToReadable = function(minutes) {
-							return (Math.floor(minutes/60) > 0 ? Math.floor(minutes/60) + "h " : "") + (minutes%60 > 0 ? minutes%60+"m" : "");
+							return (Math.floor(minutes / 60) > 0 ? Math.floor(minutes / 60) + "h " : "") + (minutes % 60 > 0 ? minutes % 60 + "m" : "");
 						}
 
 						$scope.eventToEventLabel = function(event) {
@@ -552,16 +552,16 @@ module.exports = function(RED) {
 							return $scope.formatTime(date.getHours(), date.getMinutes());
 						}
 
-						$scope.formatTime = function (hours, minutes) {
+						$scope.formatTime = function(hours, minutes) {
 							return $scope.padZero(hours) + ":" + $scope.padZero(minutes);
 						}
 
 						$scope.updateSolarLabels = function() {
 							const startOffset = $scope.formtimer.startOffset > 0 ? "+" + $scope.formtimer.startOffset : ($scope.formtimer.startOffset || 0);
-							const startTypeLabel = startOffset === 0 ? $scope.i18n[$scope.formtimer.starttype] : $scope.i18n[$scope.formtimer.starttype].substr(0,8);
+							const startTypeLabel = startOffset === 0 ? $scope.i18n[$scope.formtimer.starttype] : $scope.i18n[$scope.formtimer.starttype].substr(0, 8);
 							$scope.formtimer.solarStarttimeLabel = startTypeLabel + (startOffset != 0 ? " " + startOffset + "m" : "");
 							const endOffset = $scope.formtimer.endOffset > 0 ? "+" + $scope.formtimer.endOffset : ($scope.formtimer.endOffset || 0);
-							const endTypeLabel = endOffset === 0 ? $scope.i18n[$scope.formtimer.endtype] : $scope.i18n[$scope.formtimer.endtype].substr(0,8);
+							const endTypeLabel = endOffset === 0 ? $scope.i18n[$scope.formtimer.endtype] : $scope.i18n[$scope.formtimer.endtype].substr(0, 8);
 							$scope.formtimer.solarEndtimeLabel = endTypeLabel + (endOffset != 0 ? " " + endOffset + "m" : "");
 						}
 
@@ -588,7 +588,7 @@ module.exports = function(RED) {
 						}
 
 						$scope.padZero = function(i) {
-							return i < 10 ? "0"+i : i;
+							return i < 10 ? "0" + i : i;
 						}
 
 						$scope.diff = function(startDate, endDate) {
@@ -597,7 +597,7 @@ module.exports = function(RED) {
 							diff -= hours * 1000 * 60 * 60;
 							const minutes = Math.floor(diff / 1000 / 60);
 
-							return (hours*60)+minutes;
+							return (hours * 60) + minutes;
 						}
 
 						$scope.getElement = function(elementId) {
@@ -607,7 +607,7 @@ module.exports = function(RED) {
 						$scope.changeFilter = function(filter) {
 							$scope.overviewFilter = filter;
 						}
-						
+
 						$scope.getTimersByOverviewFilter = function() {
 							if ($scope.overviewFilter == 'all') return $scope.timers;
 							return $scope.timers ? $scope.timers.filter(t => !t.disabled && $scope.isDeviceEnabled(t.output)) : [];
@@ -616,9 +616,9 @@ module.exports = function(RED) {
 						$scope.toggleDeviceStatus = function(deviceIndex) {
 							if ($scope.isDeviceEnabled(deviceIndex)) {
 								$scope.disabledDevices.push(deviceIndex);
-							 } else {
+							} else {
 								$scope.disabledDevices.splice($scope.disabledDevices.indexOf(deviceIndex), 1);
-							 }
+							}
 							$scope.sendTimersToOutput();
 						}
 
@@ -628,7 +628,8 @@ module.exports = function(RED) {
 						}
 
 						$scope.getTimersFromServer = function() {
-							$.ajax({ url: "time-scheduler/getNode/" + $scope.nodeId, dataType: 'json',
+							$.ajax({
+								url: "time-scheduler/getNode/" + $scope.nodeId, dataType: 'json',
 								beforeSend: function() {
 									$scope.loading = true;
 								},
@@ -656,7 +657,7 @@ module.exports = function(RED) {
 						node.status({});
 						timers = timers.filter(timer => timer.output < config.devices.length);
 					} else {
-						node.status({fill:"green",shape:"dot",text:"time-scheduler.contextCreated"});
+						node.status({ fill: "green", shape: "dot", text: "time-scheduler.contextCreated" });
 						timers = [];
 					}
 					setTimers(timers);
@@ -666,8 +667,8 @@ module.exports = function(RED) {
 				function validateTimers(timers) {
 					return Array.isArray(timers) && timers.every(element => {
 						if ((!element.hasOwnProperty("starttime") || !element.hasOwnProperty("days")) ||
-						(!config.eventMode && !element.hasOwnProperty("endtime")) ||
-						(config.eventMode && !element.hasOwnProperty("event"))) return false;
+							(!config.eventMode && !element.hasOwnProperty("endtime")) ||
+							(config.eventMode && !element.hasOwnProperty("event"))) return false;
 
 						if (!element.hasOwnProperty("output")) element.output = "0";
 						else if (Number.isInteger(element.output)) element.output = element.output.toString();
@@ -695,7 +696,7 @@ module.exports = function(RED) {
 				}
 
 				function setDisabledDevices(disabledDevices) {
-					node.context().set('settings', {disabledDevices});
+					node.context().set('settings', { disabledDevices });
 				}
 
 				function addDisabledDevice(device) {
@@ -708,7 +709,7 @@ module.exports = function(RED) {
 					}
 					return false;
 				}
-				
+
 				function removeDisabledDevice(device) {
 					const disabledDevices = getDisabledDevices();
 					const deviceIndex = (isNaN(device) ? config.devices.indexOf(device) : device).toString();
@@ -722,11 +723,11 @@ module.exports = function(RED) {
 
 				function createInitTimeout() {
 					const today = new Date();
-					const remaining = config.refresh - (today.getSeconds()%config.refresh);
+					const remaining = config.refresh - (today.getSeconds() % config.refresh);
 					setTimeout(function() {
 						nodeInterval = setInterval(intervalTimerFunction, config.refresh * 1000);
 						intervalTimerFunction();
-					}, (remaining*1000) - today.getMilliseconds());
+					}, (remaining * 1000) - today.getMilliseconds());
 				}
 
 				function intervalTimerFunction() {
@@ -737,7 +738,7 @@ module.exports = function(RED) {
 
 				function addOutputValues(outputValues) {
 					for (let device = 0; device < config.devices.length; device++) {
-						const msg = {payload: isInTime(device)};
+						const msg = { payload: isInTime(device) };
 						if (config.sendTopic) msg.topic = config.devices[device];
 						msg.payload != null ? outputValues.push(msg) : outputValues.push(null);
 					}
@@ -761,18 +762,18 @@ module.exports = function(RED) {
 					if (nodeTimers.length > 0 && !getDisabledDevices().includes(deviceIndex.toString())) {
 						const date = new Date();
 
-						nodeTimers.filter(timer => timer.output == deviceIndex).forEach(function (timer) {
+						nodeTimers.filter(timer => timer.output == deviceIndex).forEach(function(timer) {
 							if (status != null) return;
 							if (timer.hasOwnProperty("disabled")) return;
 
 							const utcDay = localDayToUtc(timer, date.getDay());
 							const localStarttime = new Date(timer.starttime);
 							const localEndtime = config.eventMode ? localStarttime : new Date(timer.endtime);
-							const daysDiff = localEndtime.getDay()-localStarttime.getDay();
+							const daysDiff = localEndtime.getDay() - localStarttime.getDay();
 
 							if (daysDiff != 0) {
 								// WRAPS AROUND MIDNIGHT (SERVER PERSPECTIVE)
-								const utcYesterday = utcDay-1 < 0 ? 6 : utcDay-1;
+								const utcYesterday = utcDay - 1 < 0 ? 6 : utcDay - 1;
 								if (timer.days[utcYesterday] === 1) {
 									// AND STARTED YESTERDAY (SERVER PERSPECTIVE)
 									const compareDate = new Date(localEndtime);
@@ -834,14 +835,14 @@ module.exports = function(RED) {
 							if (t.hasOwnProperty("startSolarEvent")) {
 								const offset = t.startSolarOffset || 0;
 								const solarTime = sunTimes[t.startSolarEvent];
-								t.starttime = solarTime.getTime() + (offset*60*1000);
+								t.starttime = solarTime.getTime() + (offset * 60 * 1000);
 							}
 							if (t.hasOwnProperty("endSolarEvent")) {
 								const offset = t.endSolarOffset || 0;
 								const solarTime = sunTimes[t.endSolarEvent];
-								t.endtime = solarTime.getTime() + (offset*60*1000);
+								t.endtime = solarTime.getTime() + (offset * 60 * 1000);
 								if (t.startSolarEvent === 'sunset' && t.endSolarEvent === 'sunrise')
-									t.endtime+=24*60*60*1000;
+									t.endtime += 24 * 60 * 60 * 1000;
 							}
 							return t;
 						});
@@ -853,7 +854,7 @@ module.exports = function(RED) {
 				function getNodeData() {
 					const timers = getTimers();
 					const disabledDevices = getDisabledDevices();
-					return {timers, settings: {disabledDevices}};
+					return { timers, settings: { disabledDevices } };
 				}
 
 				function serializeData() {
@@ -873,11 +874,11 @@ module.exports = function(RED) {
 					}
 				});
 			}
-		} catch(error) {
+		} catch (error) {
 			console.log("TimeSchedulerNode:", error);
 		}
 	}
-	RED.nodes.registerType("ui_time_scheduler",TimeSchedulerNode);
+	RED.nodes.registerType("ui_time_scheduler", TimeSchedulerNode);
 
 	let uiPath = ((RED.settings.ui || {}).path);
 	if (uiPath == undefined) uiPath = 'ui';

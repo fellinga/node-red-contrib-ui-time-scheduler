@@ -1,5 +1,5 @@
 {
-    "time-scheduler" : {
+    "time-scheduler": {
         "payloadReceived": "Payload erhalten.",
         "invalidPayload": "Ungültige Payload.",
         "contextCreated": "Kontext erstellt.",
@@ -12,7 +12,7 @@
             "startDay": "Erster Tag",
             "block": "Blocke",
             "refresh": "Refresh",
-            "customPayload" : "User Events",
+            "customPayload": "User Events",
             "on": "Ein",
             "off": "Aus",
             "eventMode": "Event Modus",
@@ -22,13 +22,21 @@
             "devices": "Geräte",
             "device": "Gerät"
         },
-        "days": ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"],
+        "days": [
+            "Sonntag",
+            "Montag",
+            "Dienstag",
+            "Mittwoch",
+            "Donnerstag",
+            "Freitag",
+            "Samstag"
+        ],
         "customPayloadDesc": "Akzeptiere Frontend-Freitexteingaben für Events",
         "eventModeDesc": "Erstelle einzelne Events anstatt eines Zeitplanes",
         "onlySendChangeDesc": "Blockiere Nachrichten bis sich der Wert ändert",
         "topicDesc": "Sende den Gerätenamen per msg.topic",
         "copy": "Kopie",
-        "ui" : {
+        "ui": {
             "start": "Start",
             "starttime": "Start­zeit",
             "end": "Ende",
@@ -36,7 +44,15 @@
             "event": "Ereignis",
             "duration": "Dauer",
             "overview": "Übersicht",
-            "days": ["SO","MO","DI","MI","DO","FR","SA"],
+            "days": [
+                "SO",
+                "MO",
+                "DI",
+                "MI",
+                "DO",
+                "FR",
+                "SA"
+            ],
             "daysActive": "Wähle aktive Tage",
             "active": "Aktive",
             "all": "Alle",
