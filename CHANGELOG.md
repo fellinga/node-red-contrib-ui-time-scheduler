@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.13.0] - 2021-07-01
+
+### new
+- added additional sun events for default mode
+
+----------
 ## [v1.12.0] - 2021-07-01
 
 ### new
