@@ -232,12 +232,24 @@ module.exports = function(RED) {
 					</div>
 					<div ng-show="showSunSettings">
 						<div layout="row" style="height: 50px;">
-							<md-input-container>
+							<md-input-container flex="60">
 								<label style="color: var(--nr-dashboard-widgetTextColor)">Starttype</label>
 								<md-select class="nr-dashboard-dropdown" ng-model="formtimer.starttype" ng-change="updateSolarLabels()">
 									<md-option value="custom" selected> ${RED._("time-scheduler.ui.custom")} </md-option>
 									<md-option value="sunrise"> ${RED._("time-scheduler.ui.sunrise")} </md-option>
+									<md-option ng-if="${config.eventMode}" value="sunriseEnd"> ${RED._("time-scheduler.ui.sunriseEnd")} </md-option>
+									<md-option ng-if="${config.eventMode}" value="goldenHourEnd"> ${RED._("time-scheduler.ui.goldenHourEnd")} </md-option>
+									<md-option ng-if="${config.eventMode}" value="solarNoon"> ${RED._("time-scheduler.ui.solarNoon")} </md-option>
+									<md-option ng-if="${config.eventMode}" value="goldenHour"> ${RED._("time-scheduler.ui.goldenHour")} </md-option>
+									<md-option ng-if="${config.eventMode}" value="sunsetStart"> ${RED._("time-scheduler.ui.sunsetStart")} </md-option>
 									<md-option value="sunset"> ${RED._("time-scheduler.ui.sunset")} </md-option>
+									<md-option ng-if="${config.eventMode}" value="dusk"> ${RED._("time-scheduler.ui.dusk")} </md-option>
+									<md-option ng-if="${config.eventMode}" value="nauticalDusk"> ${RED._("time-scheduler.ui.nauticalDusk")} </md-option>
+									<md-option ng-if="${config.eventMode}" value="night"> ${RED._("time-scheduler.ui.night")} </md-option>
+									<md-option ng-if="${config.eventMode}" value="nadir"> ${RED._("time-scheduler.ui.nadir")} </md-option>
+									<md-option ng-if="${config.eventMode}" value="nightEnd"> ${RED._("time-scheduler.ui.nightEnd")} </md-option>
+									<md-option ng-if="${config.eventMode}" value="nauticalDawn"> ${RED._("time-scheduler.ui.nauticalDawn")} </md-option>
+									<md-option ng-if="${config.eventMode}" value="dawn"> ${RED._("time-scheduler.ui.dawn")} </md-option>
 								</md-select>
 							</md-input-container>
 							<md-input-container flex="40" ng-if="formtimer.starttype!='custom'">
