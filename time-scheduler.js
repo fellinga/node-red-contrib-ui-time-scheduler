@@ -237,19 +237,19 @@ module.exports = function(RED) {
 								<md-select class="nr-dashboard-dropdown" ng-model="formtimer.starttype" ng-change="updateSolarLabels()">
 									<md-option value="custom" selected> ${RED._("time-scheduler.ui.custom")} </md-option>
 									<md-option value="sunrise"> ${RED._("time-scheduler.ui.sunrise")} </md-option>
-									<md-option ng-if="${config.eventMode}" value="sunriseEnd"> ${RED._("time-scheduler.ui.sunriseEnd")} </md-option>
-									<md-option ng-if="${config.eventMode}" value="goldenHourEnd"> ${RED._("time-scheduler.ui.goldenHourEnd")} </md-option>
-									<md-option ng-if="${config.eventMode}" value="solarNoon"> ${RED._("time-scheduler.ui.solarNoon")} </md-option>
-									<md-option ng-if="${config.eventMode}" value="goldenHour"> ${RED._("time-scheduler.ui.goldenHour")} </md-option>
-									<md-option ng-if="${config.eventMode}" value="sunsetStart"> ${RED._("time-scheduler.ui.sunsetStart")} </md-option>
+									<md-option value="sunriseEnd"> ${RED._("time-scheduler.ui.sunriseEnd")} </md-option>
+									<md-option value="goldenHourEnd"> ${RED._("time-scheduler.ui.goldenHourEnd")} </md-option>
+									<md-option value="solarNoon"> ${RED._("time-scheduler.ui.solarNoon")} </md-option>
+									<md-option value="goldenHour"> ${RED._("time-scheduler.ui.goldenHour")} </md-option>
+									<md-option value="sunsetStart"> ${RED._("time-scheduler.ui.sunsetStart")} </md-option>
 									<md-option value="sunset"> ${RED._("time-scheduler.ui.sunset")} </md-option>
-									<md-option ng-if="${config.eventMode}" value="dusk"> ${RED._("time-scheduler.ui.dusk")} </md-option>
-									<md-option ng-if="${config.eventMode}" value="nauticalDusk"> ${RED._("time-scheduler.ui.nauticalDusk")} </md-option>
-									<md-option ng-if="${config.eventMode}" value="night"> ${RED._("time-scheduler.ui.night")} </md-option>
-									<md-option ng-if="${config.eventMode}" value="nadir"> ${RED._("time-scheduler.ui.nadir")} </md-option>
-									<md-option ng-if="${config.eventMode}" value="nightEnd"> ${RED._("time-scheduler.ui.nightEnd")} </md-option>
-									<md-option ng-if="${config.eventMode}" value="nauticalDawn"> ${RED._("time-scheduler.ui.nauticalDawn")} </md-option>
-									<md-option ng-if="${config.eventMode}" value="dawn"> ${RED._("time-scheduler.ui.dawn")} </md-option>
+									<md-option value="dusk"> ${RED._("time-scheduler.ui.dusk")} </md-option>
+									<md-option value="nauticalDusk"> ${RED._("time-scheduler.ui.nauticalDusk")} </md-option>
+									<md-option value="night"> ${RED._("time-scheduler.ui.night")} </md-option>
+									<md-option value="nadir"> ${RED._("time-scheduler.ui.nadir")} </md-option>
+									<md-option value="nightEnd"> ${RED._("time-scheduler.ui.nightEnd")} </md-option>
+									<md-option value="nauticalDawn"> ${RED._("time-scheduler.ui.nauticalDawn")} </md-option>
+									<md-option value="dawn"> ${RED._("time-scheduler.ui.dawn")} </md-option>
 								</md-select>
 							</md-input-container>
 							<md-input-container flex="40" ng-if="formtimer.starttype!='custom'">
@@ -262,7 +262,19 @@ module.exports = function(RED) {
 								<label style="color: var(--nr-dashboard-widgetTextColor)">Endtype</label>
 								<md-select class="nr-dashboard-dropdown" ng-model="formtimer.endtype" ng-change="updateSolarLabels()">
 									<md-option value="sunrise"> ${RED._("time-scheduler.ui.sunrise")} </md-option>
+									<md-option value="sunriseEnd"> ${RED._("time-scheduler.ui.sunriseEnd")} </md-option>
+									<md-option value="goldenHourEnd"> ${RED._("time-scheduler.ui.goldenHourEnd")} </md-option>
+									<md-option value="solarNoon"> ${RED._("time-scheduler.ui.solarNoon")} </md-option>
+									<md-option value="goldenHour"> ${RED._("time-scheduler.ui.goldenHour")} </md-option>
+									<md-option value="sunsetStart"> ${RED._("time-scheduler.ui.sunsetStart")} </md-option>
 									<md-option value="sunset"> ${RED._("time-scheduler.ui.sunset")} </md-option>
+									<md-option value="dusk"> ${RED._("time-scheduler.ui.dusk")} </md-option>
+									<md-option value="nauticalDusk"> ${RED._("time-scheduler.ui.nauticalDusk")} </md-option>
+									<md-option value="night"> ${RED._("time-scheduler.ui.night")} </md-option>
+									<md-option value="nadir"> ${RED._("time-scheduler.ui.nadir")} </md-option>
+									<md-option value="nightEnd"> ${RED._("time-scheduler.ui.nightEnd")} </md-option>
+									<md-option value="nauticalDawn"> ${RED._("time-scheduler.ui.nauticalDawn")} </md-option>
+									<md-option value="dawn"> ${RED._("time-scheduler.ui.dawn")} </md-option>
 								</md-select>
 							</md-input-container>
 							<md-input-container flex="40" ng-if="!${config.eventMode} && formtimer.starttype!='custom'">
@@ -853,8 +865,7 @@ module.exports = function(RED) {
 								const offset = t.endSolarOffset || 0;
 								const solarTime = sunTimes[t.endSolarEvent];
 								t.endtime = solarTime.getTime() + (offset * 60 * 1000);
-								if (t.startSolarEvent === 'sunset' && t.endSolarEvent === 'sunrise')
-									t.endtime += 24 * 60 * 60 * 1000;
+								if (t.starttime >= t.endtime) t.endtime += 24 * 60 * 60 * 1000;
 							}
 							return t;
 						});
