@@ -106,8 +106,12 @@ module.exports = function(RED) {
 							<md-button aria-label="filter" style="width: 100%; margin: 0px;"><md-icon> filter_alt </md-icon></md-button>
 						</md-fab-trigger>
 						<md-fab-actions style="width: 84px;">
-							<md-button aria-label="enabled" style="width: 100%; margin: 7px 0 0 0; border: 2px solid var(--nr-dashboard-groupBorderColor);" ng-click="changeFilter('enabled')" ng-disabled="overviewFilter != 'all'"> ${RED._("time-scheduler.ui.active")} </md-button>
-							<md-button aria-label="all" style="width: 100%; margin: 7px 0 0 0; border: 2px solid var(--nr-dashboard-groupBorderColor);" ng-click="changeFilter('all')" ng-disabled="overviewFilter == 'all'"> ${RED._("time-scheduler.ui.all")} </md-button>
+							<md-button aria-label="enabled" style="width: 100%; margin: 7px 0 0 0; border: 2px solid var(--nr-dashboard-groupBorderColor);" ng-click="changeFilter('enabled')" ng-disabled="overviewFilter != 'all'">
+								${RED._("time-scheduler.ui.active")} <md-icon> {{overviewFilter === "all" ? "" : "check"}} </md-icon> 
+							</md-button>
+							<md-button aria-label="all" style="width: 100%; margin: 7px 0 0 0; border: 2px solid var(--nr-dashboard-groupBorderColor);" ng-click="changeFilter('all')" ng-disabled="overviewFilter == 'all'">
+								${RED._("time-scheduler.ui.all")} <md-icon> {{overviewFilter === "all" ? "check" : ""}} </md-icon> 
+							</md-button>
 						</md-fab-actions>
 					</md-fab-speed-dial>
 				</span>
@@ -129,7 +133,12 @@ module.exports = function(RED) {
 						</md-list-item>
 					<md-list>
 				</div>
-				<div ng-if="getTimersByOverviewFilter().length == 0"> <p> ${RED._("time-scheduler.ui.emptyOverview")} <p> </div>
+				<div ng-if="timers.length == 0">
+					<p> ${RED._("time-scheduler.ui.emptyOverview")} <p>
+				</div>
+				<div ng-if="timers.length != 0 && getTimersByOverviewFilter().length == 0">
+					<p> ${RED._("time-scheduler.ui.noActiveOverview")} <p>
+				</div>
 			</div>
 			<div id="timersView-${uniqueId}">
 				<md-list flex ng-cloak style="text-align: center">
@@ -370,10 +379,7 @@ module.exports = function(RED) {
 									node.status({ fill: "yellow", shape: "dot", text: "time-scheduler.invalidPayload" });
 								}
 
-								const parsedSettings = parsedInput.settings;
-								if (parsedSettings && parsedSettings.disabledDevices) {
-									setDisabledDevices(parsedSettings.disabledDevices);
-								}
+								if (parsedInput.settings) setSettings(parsedInput.settings);
 							} catch (e) {
 								node.status({ fill: "red", shape: "dot", text: e.toString() });
 							}
@@ -385,7 +391,7 @@ module.exports = function(RED) {
 						node.status({});
 						if (orig && orig.msg[0]) {
 							setTimers(orig.msg[0].payload.timers);
-							setDisabledDevices(orig.msg[0].payload.disabledDevices);
+							setSettings(orig.msg[0].payload.settings);
 							const sendMsg = JSON.parse(JSON.stringify(orig.msg));
 							sendMsg[0].payload = serializeData();
 							addOutputValues(sendMsg);
@@ -551,7 +557,10 @@ module.exports = function(RED) {
 							if (!$scope.msg) $scope.msg = [{ payload: "" }];
 							$scope.msg[0].payload = {
 								timers: angular.copy($scope.timers),
-								disabledDevices: angular.copy($scope.disabledDevices)
+								settings: {
+									disabledDevices: angular.copy($scope.disabledDevices),
+									overviewFilter: angular.copy($scope.overviewFilter)
+								}
 							};
 							$scope.send([$scope.msg[0]]);
 						}
@@ -630,6 +639,7 @@ module.exports = function(RED) {
 
 						$scope.changeFilter = function(filter) {
 							$scope.overviewFilter = filter;
+							$scope.sendTimersToOutput();
 						}
 
 						$scope.getTimersByOverviewFilter = function() {
@@ -660,6 +670,7 @@ module.exports = function(RED) {
 								success: function(json) {
 									$scope.timers = json.timers;
 									$scope.disabledDevices = json.settings.disabledDevices;
+									$scope.overviewFilter = json.settings.overviewFilter;
 									$scope.$digest();
 								},
 								complete: function() {
@@ -714,13 +725,20 @@ module.exports = function(RED) {
 					node.context().set('timers', timers);
 				}
 
+				function getSettings() {
+					return node.context().get('settings') || {};
+				}
+
+				function setSettings(settings) {
+					node.context().set('settings', settings);
+				}
+
 				function getDisabledDevices() {
-					const settings = node.context().get('settings') || {};
-					return settings.disabledDevices || [];
+					return getSettings().disabledDevices || [];
 				}
 
 				function setDisabledDevices(disabledDevices) {
-					node.context().set('settings', { disabledDevices });
+					setSettings({ ...getSettings(), disabledDevices });
 				}
 
 				function addDisabledDevice(device) {
@@ -875,9 +893,7 @@ module.exports = function(RED) {
 				}
 
 				function getNodeData() {
-					const timers = getTimers();
-					const disabledDevices = getDisabledDevices();
-					return { timers, settings: { disabledDevices } };
+					return { timers: getTimers(), settings: getSettings() };
 				}
 
 				function serializeData() {

@@ -73,6 +73,7 @@
             "dawn": "dawn",
             "payloadWarning": "Invalid or no payload provided.",
             "emptyOverview": "Nothing planned yet. Click \"Overview\" and select a device.",
+            "noActiveOverview": "No schedules are active. Click \"Overview\" and select a device.",
             "nothingPlanned": "Nothing planned yet. Click the plus sign to add a new timer.",
             "alertTimespan": "Incorrect settings detected! \n - at least 1 minute \n - must not exceed midnight",
             "selectAll": "Select All"

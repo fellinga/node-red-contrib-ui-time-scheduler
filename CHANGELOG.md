@@ -1,6 +1,13 @@
 # Changelog
 
 ----------
+## [v1.13.1] - 2021-07-10
+
+### Changed
+- overview filter value is now stored in context
+- visual improvements for selected overview filter
+  
+----------
 ## [v1.13.0] - 2021-07-01
 
 ### new
