@@ -1,6 +1,15 @@
 # Changelog
 
 ----------
+## [v1.13.2] - 2021-07-11
+
+### Fixed
+- respect group width
+
+### Changed
+- height calculation
+  
+----------
 ## [v1.13.1] - 2021-07-10
 
 ### Changed

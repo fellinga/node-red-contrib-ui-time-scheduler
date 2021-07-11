@@ -33,7 +33,6 @@ module.exports = function(RED) {
 		const styles = String.raw`
 		<style>
 			#${divPrimary} {
-				height: ${86 + (config.height * 80)}px;
 				padding-left: 6px;
 				padding-right: 7px;
 			}
@@ -70,8 +69,8 @@ module.exports = function(RED) {
 			.weekDay-${uniqueId} {
 				color: var(--nr-dashboard-widgetTextColor);
 				background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
-				width: 36px;
-				line-height: 36px;
+				width: 34px;
+				line-height: 34px;
 				display: inline-block;
 				border-radius: 50%;
 				opacity: 0.4;
@@ -155,7 +154,7 @@ module.exports = function(RED) {
 							`}
 						</div>
 					</md-subheader>
-					<md-list-item class="md-2-line" style="height: 80px; padding: 0 5px; border-left: 2px solid {{timer.disabled ? 'red' : timer.startSolarEvent ? '#FCD440' : 'transparent'}};" ng-repeat="timer in timers | filter:{ output: myDeviceSelect }:true track by $index">
+					<md-list-item class="md-2-line" style="height: 74px; padding: 0 5px; border-left: 2px solid {{timer.disabled ? 'red' : timer.startSolarEvent ? '#FCD440' : 'transparent'}};" ng-repeat="timer in timers | filter:{ output: myDeviceSelect }:true track by $index">
 						<div class="md-list-item-text" ng-click="showAddView(timers.indexOf(timer))" style="opacity:{{timer.disabled ? 0.4 : 1}};">
 							<div layout="row">
 								<span flex=""> {{$index+1}} </span>
@@ -168,7 +167,7 @@ module.exports = function(RED) {
 								<span flex="25"> {{minutesToReadable(diff(timer.starttime,timer.endtime))}} </span>
 								`}
 							</div>
-							<div layout="row" style="padding-top: 6px; padding-bottom: 6px;">
+							<div layout="row" style="padding-top: 4px; padding-bottom: 4px;">
 								<span flex="" ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="dayIndex=$index+${config.startDay}">
 									<span class="weekDay-${uniqueId} {{(timer.days[localDayToUtc(timer,dayIndex)]) ? 'weekDayActive-${uniqueId}' : ''}}"> {{days[dayIndex]}} </span>
 								</span>
@@ -345,6 +344,8 @@ module.exports = function(RED) {
 					format: HTML(config),
 					templateScope: "local",
 					group: config.group,
+					width: config.width,
+					height: Number(config.height) + 3,
 					order: config.order,
 					emitOnlyNewValues: false,
 					forwardInputMessages: false,
