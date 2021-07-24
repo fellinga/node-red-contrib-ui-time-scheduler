@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.14.0] - 2021-07-24
+
+### New
+- option to send off payloads only at the defined endtime
+
+----------
 ## [v1.13.2] - 2021-07-11
 
 ### Fixed

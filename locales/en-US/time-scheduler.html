@@ -44,15 +44,22 @@
     <p> To create a new schedule click the nodes plus sign at the right top 
         corner (at the frontend/dashboard)
     </p>
-    <p> The <code>refresh</code> property adjusts the frequency of how often
-        true/false is sent (in seconds - default 60).
-    </p>
-    <p> The section <code>devices</code> must contain at least 1 device and offers 
+    <p> The section <code>Devices</code> must contain at least 1 device and offers 
         the possibility to add many more. Every device has a node output and an
         independent schedule at the ui dashboard.
     </p>
-    <p> The <code>event mode</code> allows you to define individual on/off events
-        instead of a time frame.
+    <p> The <code>Event Mode</code> allows you to define individual events
+        instead of a schedule with fixed start and end time.
+    </p>
+    <p> The <code>Refresh</code> property adjusts the frequency of how often
+        timers are evaluated (in seconds - default 60).
+    </p>
+    <p> If the <code>Single off</code> property is checked the node will only output
+        "off" payloads at a timers defined end time.
+    </p>
+    <p> If the <code>Block</code> property is checked the node will only output anything 
+        if the current value is different from the previous value. The value after a 
+        deploy (or reboot) is "undefined".
     </p>
 
     <h3>References</h3>

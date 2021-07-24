@@ -53,13 +53,9 @@ SOFTWARE.
             <ol id="node-input-eventOption-container"></ol>
         </div>
     </div>
-    <div class="form-row" id="node-div-refresh">
-        <label for="node-input-refresh"><i class="fa fa-clock-o"></i> <span data-i18n="time-scheduler.label.refresh"></span> </label>
-        <input type="number" id="node-input-refresh" min="1" max="60"/>
-    </div>
     <div class="form-row">
         <label for="node-input-startDay"><i class="fa fa-calendar"></i> <span data-i18n="time-scheduler.label.startDay"></span> </label>
-        <select id="node-input-startDay" style="width:156px;">
+        <select id="node-input-startDay" style="width:25%; margin-right: 6px;">
             <option value="0" data-i18n="time-scheduler.days.0"> </option>
             <option value="1" data-i18n="time-scheduler.days.1"> </option>
             <option value="2" data-i18n="time-scheduler.days.2"> </option>
@@ -68,6 +64,15 @@ SOFTWARE.
             <option value="5" data-i18n="time-scheduler.days.5"> </option>
             <option value="6" data-i18n="time-scheduler.days.6"> </option>
         </select>
+        <span class="form-row" id="node-div-refresh">
+            <label for="node-input-refresh"><i class="fa fa-refresh"></i> <span data-i18n="time-scheduler.label.refresh"></span> </label>
+            <input type="number" id="node-input-refresh" min="1" max="60" style="width:25%;"/>
+        </span>
+    </div>
+    <div class="form-row" id="node-div-singleOff">
+        <label for="node-input-singleOff"><i class="fa fa-dot-circle-o"></i> <span data-i18n="time-scheduler.label.singleOff"></span> </label>
+        <input type="checkbox" id="node-input-singleOff" style="display: inline-block; width: auto; vertical-align: top;">
+        <span data-i18n="time-scheduler.singleOffDesc"></span>
     </div>
     <div class="form-row">
         <label for="node-input-onlySendChange"><i class="fa fa-hand-paper-o"></i> <span data-i18n="time-scheduler.label.block"></span> </label>
@@ -101,10 +106,11 @@ SOFTWARE.
             startDay: { value: 0 },
             refresh: { value: 60 },
             devices: { value: ["Device 1"] },
+            singleOff: { value: false },
             onlySendChange: { value: false },
             customPayload: { value: false },
             eventMode: { value: false },
-            eventOptions: { value: [{ label: RED._("time-scheduler.label.on"), event: "true" }, { label: RED._("time-scheduler.label.off"), event: "false" }] },
+            eventOptions: { value: [{ label: "On", event: "true" }, { label: "Off", event: "false" }] },
             sendTopic: { value: false },
             lat: { value: '' },
             lon: { value: '' },
@@ -150,11 +156,13 @@ SOFTWARE.
                     $("#node-input-customPayload").prop("checked") ? '' : $("#node-div-eventOption").show();
                     $("#node-input-refresh").val(60);
                     $("#node-div-refresh").hide();
+                    $("#node-div-singleOff").hide();
                 } else {
                     $("#node-input-customPayload").prop("checked", false);
                     $("#node-div-customPayload").hide();
                     $("#node-div-eventOption").hide();
                     $("#node-div-refresh").show();
+                    $("#node-div-singleOff").show();
                 }
             });
 

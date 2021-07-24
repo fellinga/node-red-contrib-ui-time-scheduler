@@ -46,15 +46,22 @@
     <p> Um einen neuen Zeitplan zu erstellen klicke rechts oben auf das Plus Symbol
         (im Frontend/Dashboard).
     </p>
-    <p> Die Eigenschaft <code>refresh</code> bestimmt wie oft ein Ausgang true oder 
-        false sendet (in Sekunden - Standard 60).
-    </p>
     <p> Der Bereich <code>Geräte</code> muss mindestens ein Gerät beinhalten und bietet
         die Möglichkeit viele weitere hinzuzufügen. Jedes Gerät erhält dann einen eigenen
         Ausgang und eigene Zeitpläne im Dashboard.
     </p>
-    <p> Der <code>Event Modus</code> ermöglicht es dir einzelne ein/aus Ereignisse anstatt
-        einen Zeitraumes zu definieren.
+    <p> Der <code>Event Modus</code> ermöglicht es einzelne Ereignisse anstatt
+        einen Zeitraumes mit fixer Start- und Endzeit zu definieren.
+    </p>
+    <p> Die Eigenschaft <code>Refresh</code> bestimmt wie oft Zeitpläne bewertet
+        werden (in Sekunden - Standard 60).
+    </p>
+    <p> Die Eigentschaft <code>Genaues Aus</code> sendet "Aus"-Nachrichten nur
+        zur definierten Endzeit eines Zeitplanes.
+    </p>
+    <p> Die Eigentschaft <code>Blocke</code> sendet nur dann Nachrichten wenn der 
+        aktulle Wert sich vom vorherigen Unterscheidet. Der Wert nach einem deploy
+        (oder reboot) ist "undefined".
     </p>
 
     <h3>Referenzen</h3>

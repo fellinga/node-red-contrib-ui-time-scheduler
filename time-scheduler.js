@@ -842,12 +842,14 @@ module.exports = function(RED) {
 							} else {
 								if (compareDate.getTime() >= localStarttime.getTime() && compareDate.getTime() < localEndtime.getTime()) {
 									status = true;
+								} else if (compareDate.getTime() == localEndtime.getTime()) {
+									status = false;
 								}
 							}
 						});
 					}
 
-					if (!config.eventMode && status == null) status = false;
+					if (!config.eventMode && !config.singleOff && status == null) status = false;
 					return status;
 				}
 
