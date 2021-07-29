@@ -650,6 +650,7 @@ module.exports = function(RED) {
 
 						$scope.toggleDeviceStatus = function(deviceIndex) {
 							if ($scope.isDeviceEnabled(deviceIndex)) {
+								$scope.disabledDevices = $scope.disabledDevices || [];
 								$scope.disabledDevices.push(deviceIndex);
 							} else {
 								$scope.disabledDevices.splice($scope.disabledDevices.indexOf(deviceIndex), 1);
@@ -688,7 +689,7 @@ module.exports = function(RED) {
 				let prevMsg = [];
 
 				(() => {
-					let timers = node.context().get('timers');
+					let timers = getContextValue('timers');
 					if (validateTimers(timers)) {
 						node.status({});
 						timers = timers.filter(timer => timer.output < config.devices.length);
@@ -713,8 +714,18 @@ module.exports = function(RED) {
 					});
 				}
 
+				function getContextValue(key) {
+					return config.customContextStore && RED.settings.contextStorage && RED.settings.contextStorage.hasOwnProperty(config.customContextStore) ?
+						node.context().get(key, config.customContextStore) : node.context().get(key);
+				}
+
+				function setContextValue(key, value) {
+					config.customContextStore && RED.settings.contextStorage && RED.settings.contextStorage.hasOwnProperty(config.customContextStore) ?
+						node.context().set(key, value, config.customContextStore) : node.context().set(key, value);
+				}
+
 				function getTimers() {
-					const timers = node.context().get('timers') || [];
+					const timers = getContextValue('timers') || [];
 					return updateSolarEvents(timers).sort(function(a, b) {
 						const millisA = getNowWithCustomTime(a.starttime);
 						const millisB = getNowWithCustomTime(b.starttime);
@@ -723,15 +734,15 @@ module.exports = function(RED) {
 				}
 
 				function setTimers(timers) {
-					node.context().set('timers', timers);
+					setContextValue('timers', timers);
 				}
 
 				function getSettings() {
-					return node.context().get('settings') || {};
+					return getContextValue('settings') || {};
 				}
 
 				function setSettings(settings) {
-					node.context().set('settings', settings);
+					setContextValue('settings', settings);
 				}
 
 				function getDisabledDevices() {

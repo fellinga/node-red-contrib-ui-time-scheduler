@@ -93,6 +93,10 @@ SOFTWARE.
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="time-scheduler.label.name"></span> </label>
         <input type="text" id="node-input-name">
+        <span class="form-row" id="node-div-customContextStore">
+            <label for="node-input-customContextStore"><i class="fa fa-database"></i> <span data-i18n="time-scheduler.label.context"></span> </label>
+            <select id="node-input-customContextStore" style="width:25%"></select>
+        </span>
     </div>
 </script>
 
@@ -114,6 +118,7 @@ SOFTWARE.
             sendTopic: { value: false },
             lat: { value: '' },
             lon: { value: '' },
+            customContextStore: { value: '' },
             outputs: { value: 2 },
             order: { value: 0 },
             width: {
@@ -173,6 +178,20 @@ SOFTWARE.
                     $("#node-div-eventOption").show();
                 }
             });
+
+            if (RED.settings.context && RED.settings.context.stores && RED.settings.context.stores.length > 1) {
+                for (let i = 0; i < RED.settings.context.stores.length; i++) {
+                    const value = RED.settings.context.stores[i];
+                    $('#node-input-customContextStore').append(new Option(value, value));
+                }
+                if (this.customContextStore && RED.settings.context.stores.includes(this.customContextStore)) {
+                    $('#node-input-customContextStore').val(this.customContextStore);
+                }
+                $('#node-input-name').css({ "width": "25%", "margin-right": "6px" });
+            } else {
+                $('#node-input-customContextStore').append(new Option("", ""));
+                $('#node-div-customContextStore').hide();
+            }
 
             $("#node-input-device-container").css('min-height', '165px').editableList({
                 addItem: function(row, index, data) {

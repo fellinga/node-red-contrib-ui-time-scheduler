@@ -16,6 +16,7 @@
             "customPayload": "User Events",
             "on": "Ein",
             "off": "Aus",
+            "context": "Kontext",
             "eventMode": "Event Modus",
             "eventOptions": "Events",
             "latitude": "Breitengrad",

@@ -1,6 +1,15 @@
 # Changelog
 
 ----------
+## [v1.15.0] - 2021-07-29
+
+### New
+- option to select context store
+
+### Fixed
+- disabled devices can now be set again
+
+----------
 ## [v1.14.0] - 2021-07-24
 
 ### New
