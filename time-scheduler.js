@@ -567,7 +567,9 @@ module.exports = function(RED) {
 						}
 
 						$scope.daysChanged = function() {
-							if ($scope.formtimer.dayselect.includes('all')) {
+							if ($scope.formtimer.dayselect.length === 8) {
+								$scope.formtimer.dayselect = [];
+							} else if ($scope.formtimer.dayselect.includes('all')) {
 								$scope.formtimer.dayselect = [0, 1, 2, 3, 4, 5, 6];
 							};
 						}

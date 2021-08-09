@@ -1,6 +1,15 @@
 # Changelog
 
 ----------
+## [v1.15.1] - 2021-08-09
+
+### Changed
+- select all now works both ways
+
+### Fixed
+- de translation of sun events
+  
+----------
 ## [v1.15.0] - 2021-07-29
 
 ### New
