@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.15.2] - 2021-08-13
+
+### Fixed
+- properly convert "0" event to number in event mode
+
+----------
 ## [v1.15.1] - 2021-08-09
 
 ### Changed

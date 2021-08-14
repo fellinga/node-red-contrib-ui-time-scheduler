@@ -508,8 +508,8 @@ module.exports = function(RED) {
 								if (timer.event === "true" || timer.event === true) {
 									timer.event = true;
 								} else if (timer.event === "false" || timer.event === false) {
-									timer.event = false;;
-								} else if (!isNaN(timer.event) && (timer.event + "").charAt(0) != "0") {
+									timer.event = false;
+								} else if (!isNaN(timer.event) && (timer.event === "0" || (timer.event + "").charAt(0) != "0")) {
 									timer.event = Number(timer.event);
 								}
 							} else {
