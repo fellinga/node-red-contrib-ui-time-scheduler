@@ -66,7 +66,7 @@ module.exports = function(RED) {
 			#${divPrimary} md-progress-circular path {
 				stroke: var(--nr-dashboard-widgetTextColor);
 			}
-			.weekDay-${uniqueId} {
+			#${divPrimary} .weekDay {
 				color: var(--nr-dashboard-widgetTextColor);
 				background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
 				width: 34px;
@@ -75,7 +75,7 @@ module.exports = function(RED) {
 				border-radius: 50%;
 				opacity: 0.4;
 			}
-			.weekDayActive-${uniqueId} {
+			#${divPrimary} .weekDayActive {
 				opacity: 1;
 			}
 		</style>
@@ -169,10 +169,10 @@ module.exports = function(RED) {
 							</div>
 							<div layout="row" style="padding-top: 4px; padding-bottom: 4px;">
 								<span flex="" ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="dayIndex=$index+${config.startDay}">
-									<span class="weekDay-${uniqueId} {{(timer.days[localDayToUtc(timer,dayIndex)]) ? 'weekDayActive-${uniqueId}' : ''}}"> {{days[dayIndex]}} </span>
+									<span class="weekDay {{(timer.days[localDayToUtc(timer,dayIndex)]) ? 'weekDayActive' : ''}}"> {{days[dayIndex]}} </span>
 								</span>
 								<span flex="" ng-repeat="day in days | limitTo : -${config.startDay}" ng-init="dayIndex=$index">
-									<span class="weekDay-${uniqueId} {{(timer.days[localDayToUtc(timer,dayIndex)]) ? 'weekDayActive-${uniqueId}' : ''}}"> {{days[dayIndex]}} </span>
+									<span class="weekDay {{(timer.days[localDayToUtc(timer,dayIndex)]) ? 'weekDayActive' : ''}}"> {{days[dayIndex]}} </span>
 								</span>
 							</div>
 						</div>
@@ -515,18 +515,10 @@ module.exports = function(RED) {
 							} else {
 								const endInput = $scope.getElement("timerEndtime").value.split(":");
 								let endtime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endInput[0], endInput[1], 0, 0).getTime();
-								if (endInput[0] === "00" && endInput[1] === "00") endtime += 24 * 60 * 60 * 1000;
 
-								if ($scope.formtimer.starttype !== "custom") {
-									timer.endSolarEvent = $scope.formtimer.endtype;
-									timer.endSolarOffset = $scope.formtimer.endOffset;
-									if (timer.startSolarEvent === timer.endSolarEvent && (timer.startSolarOffset || 0) >= (timer.endSolarOffset || 0)) {
-										alert($scope.i18n.alertTimespan);
-										return;
-									}
-								} else if ($scope.diff(starttime, endtime) < 1) {
-									alert($scope.i18n.alertTimespan);
-									return;
+								if ($scope.formtimer.starttype === "custom" && $scope.diff(starttime, endtime) < 1) {
+									if (confirm($scope.i18n.alertTimespan)) endtime += 24 * 60 * 60 * 1000;
+									else return;
 								}
 
 								timer.endtime = endtime;

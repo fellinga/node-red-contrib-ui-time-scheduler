@@ -1,6 +1,15 @@
 # Changelog
 
 ----------
+## [v1.16.0] - 2021-09-24
+
+### Changed
+- allow timers to exceed midnight
+
+### Fixed
+- improve css
+  
+----------
 ## [v1.15.2] - 2021-08-13
 
 ### Fixed

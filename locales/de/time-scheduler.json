@@ -78,7 +78,7 @@
             "emptyOverview": "Noch nichts geplant. Klicke auf \"Übersicht\" und wähle eines der Geräte.",
             "noActiveOverview": "Es sind keine Zeitpläne aktiv. Klicke auf \"Übersicht\" und wähle eines der Geräte.",
             "nothingPlanned": "Noch nichts geplant. Klicke auf das Plus Symbol um einen neuen Zeitplan zu erstellen.",
-            "alertTimespan": "Einstellungen fehlerhaft! \n - mindestens 1 Minute \n - nicht über Mitternacht",
+            "alertTimespan": "Die Auswahl überschreitet Mitternacht.\nTrotzdem speichern?",
             "selectAll": "Alle auswählen"
         }
     }
