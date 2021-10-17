@@ -204,7 +204,7 @@ SOFTWARE.
                     nameInput.appendTo(row).typedInput({ default: 'str', types: ['str'] });
 
                     const finalspan = $('<span/>', { style: "float: right;margin-top: 6px;" }).appendTo(row);
-                    finalspan.append(' &#8594; <span class="node-input-device-index">' + (index + 1) + '</span> ');
+                    finalspan.append(' &#8594; <span class="node-input-device-index">' + (index + 2) + '</span> ');
                 },
                 removeItem: function(opt) {
                     const devices = $("#node-input-device-container").editableList('items');
@@ -215,7 +215,7 @@ SOFTWARE.
                         if (regex.test(name)) {
                             $(this).find(".node-input-device-name").typedInput('value', node._("time-scheduler.label.device") + " " + (i + 1));
                         }
-                        $(this).find(".node-input-device-index").html(i + 1);
+                        $(this).find(".node-input-device-index").html(i + 2);
                     });
 
                     if (devices.length === 0) $("#node-input-device-container").editableList('addItem', {});
@@ -229,7 +229,7 @@ SOFTWARE.
                         if (regex.test(name)) {
                             $(this).find(".node-input-device-name").typedInput('value', node._("time-scheduler.label.device") + " " + (i + 1));
                         }
-                        $(this).find(".node-input-device-index").html(i + 1);
+                        $(this).find(".node-input-device-index").html(i + 2);
                     });
                 },
                 removable: true,

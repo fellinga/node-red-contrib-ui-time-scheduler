@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.16.1] - 2021-10-16
+
+### Changed
+- fixed output label
+
+----------
 ## [v1.16.0] - 2021-09-24
 
 ### Changed
