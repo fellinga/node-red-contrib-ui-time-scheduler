@@ -519,6 +519,13 @@ module.exports = function(RED) {
 								if ($scope.formtimer.starttype === "custom" && $scope.diff(starttime, endtime) < 1) {
 									if (confirm($scope.i18n.alertTimespan)) endtime += 24 * 60 * 60 * 1000;
 									else return;
+								} else if ($scope.formtimer.starttype !== "custom") {
+									timer.endSolarEvent = $scope.formtimer.endtype;
+									timer.endSolarOffset = $scope.formtimer.endOffset;
+									if (timer.startSolarEvent === timer.endSolarEvent && (timer.startSolarOffset || 0) >= (timer.endSolarOffset || 0)) {
+										alert($scope.i18n.alertTimespanDay);
+										return;
+									}
 								}
 
 								timer.endtime = endtime;

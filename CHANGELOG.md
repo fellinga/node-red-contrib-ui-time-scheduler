@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.16.2] - 2021-11-16
+
+### Changed
+- fixed solar end time
+
+----------
 ## [v1.16.1] - 2021-10-16
 
 ### Changed

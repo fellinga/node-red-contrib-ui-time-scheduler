@@ -79,6 +79,7 @@
             "noActiveOverview": "Es sind keine Zeitpläne aktiv. Klicke auf \"Übersicht\" und wähle eines der Geräte.",
             "nothingPlanned": "Noch nichts geplant. Klicke auf das Plus Symbol um einen neuen Zeitplan zu erstellen.",
             "alertTimespan": "Die Auswahl überschreitet Mitternacht.\nTrotzdem speichern?",
+            "alertTimespanDay": "Zeitspanne darf 24 Stunden nicht überschreiten.",
             "selectAll": "Alle auswählen"
         }
     }

@@ -79,6 +79,7 @@
             "noActiveOverview": "No schedules are active. Click \"Overview\" and select a device.",
             "nothingPlanned": "Nothing planned yet. Click the plus sign to add a new timer.",
             "alertTimespan": "Time frame exceeds midnight.\nDo you want to continue?",
+            "alertTimespanDay": "Time frame must not exceed 24 hours.",
             "selectAll": "Select All"
         }
     }
