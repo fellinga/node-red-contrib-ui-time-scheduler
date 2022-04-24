@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.17.0] - 2022-04-24
+
+### Changed
+- allow mixed start/end types
+
+----------
 ## [v1.16.2] - 2021-11-16
 
 ### Changed

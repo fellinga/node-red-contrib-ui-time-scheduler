@@ -154,7 +154,7 @@ module.exports = function(RED) {
 							`}
 						</div>
 					</md-subheader>
-					<md-list-item class="md-2-line" style="height: 74px; padding: 0 5px; border-left: 2px solid {{timer.disabled ? 'red' : timer.startSolarEvent ? '#FCD440' : 'transparent'}};" ng-repeat="timer in timers | filter:{ output: myDeviceSelect }:true track by $index">
+					<md-list-item class="md-2-line" style="height: 74px; padding: 0 5px; border-left: 2px solid {{timer.disabled ? 'red' : (timer.startSolarEvent || timer.endSolarEvent) ? '#FCD440' : 'transparent'}};" ng-repeat="timer in timers | filter:{ output: myDeviceSelect }:true track by $index">
 						<div class="md-list-item-text" ng-click="showAddView(timers.indexOf(timer))" style="opacity:{{timer.disabled ? 0.4 : 1}};">
 							<div layout="row">
 								<span flex=""> {{$index+1}} </span>
@@ -206,12 +206,12 @@ module.exports = function(RED) {
 								`}
 							</md-input-container>
 							` : `
-							<md-input-container flex="50" ng-show="formtimer.starttype === 'custom'">
+							<md-input-container flex="50" ng-show="formtimer.endtype === 'custom'">
 								<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.endtime")}</label>
 								<input id="timerEndtime-${uniqueId}" value="10:00" type="time" required pattern="^([0-1][0-9]|2[0-3]):([0-5][0-9])$">
 								<span class="validity"></span>
 							</md-input-container>
-							<md-input-container flex="50" ng-if="formtimer.starttype !== 'custom'">
+							<md-input-container flex="50" ng-if="formtimer.endtype !== 'custom'">
 								<label style="color: var(--nr-dashboard-widgetTextColor)">${RED._("time-scheduler.ui.endtime")}</label>
 								<input ng-model="formtimer.solarEndtimeLabel" type="text" required disabled> </input>
 								<span class="validity"></span>
@@ -240,7 +240,7 @@ module.exports = function(RED) {
 					</div>
 					<div ng-show="showSunSettings">
 						<div layout="row" style="height: 50px;">
-							<md-input-container flex="60">
+							<md-input-container flex="55">
 								<label style="color: var(--nr-dashboard-widgetTextColor)">Starttype</label>
 								<md-select class="nr-dashboard-dropdown" ng-model="formtimer.starttype" ng-change="updateSolarLabels()">
 									<md-option value="custom" selected> ${RED._("time-scheduler.ui.custom")} </md-option>
@@ -260,15 +260,16 @@ module.exports = function(RED) {
 									<md-option value="dawn"> ${RED._("time-scheduler.ui.dawn")} </md-option>
 								</md-select>
 							</md-input-container>
-							<md-input-container flex="40" ng-if="formtimer.starttype!='custom'">
+							<md-input-container flex="" ng-if="formtimer.starttype!='custom'">
 								<label style="color: var(--nr-dashboard-widgetTextColor)">Offset (min)</label>
 								<input type="number" ng-model="formtimer.startOffset" ng-change="offsetValidation('start')">
 							</md-input-container>
 						</div>
 						<div layout="row" style="height: 50px;">
-							<md-input-container ng-if="!${config.eventMode} && formtimer.starttype!='custom'">
+							<md-input-container flex="55" ng-if="!${config.eventMode}">
 								<label style="color: var(--nr-dashboard-widgetTextColor)">Endtype</label>
 								<md-select class="nr-dashboard-dropdown" ng-model="formtimer.endtype" ng-change="updateSolarLabels()">
+									<md-option value="custom" selected> ${RED._("time-scheduler.ui.custom")} </md-option>
 									<md-option value="sunrise"> ${RED._("time-scheduler.ui.sunrise")} </md-option>
 									<md-option value="sunriseEnd"> ${RED._("time-scheduler.ui.sunriseEnd")} </md-option>
 									<md-option value="goldenHourEnd"> ${RED._("time-scheduler.ui.goldenHourEnd")} </md-option>
@@ -285,7 +286,7 @@ module.exports = function(RED) {
 									<md-option value="dawn"> ${RED._("time-scheduler.ui.dawn")} </md-option>
 								</md-select>
 							</md-input-container>
-							<md-input-container flex="40" ng-if="!${config.eventMode} && formtimer.starttype!='custom'">
+							<md-input-container flex="" ng-if="!${config.eventMode} && formtimer.endtype!='custom'">
 								<label style="color: var(--nr-dashboard-widgetTextColor)">Offset (min)</label>
 								<input type="number" ng-model="formtimer.endOffset" ng-change="offsetValidation('end')">
 							</md-input-container>
@@ -449,10 +450,12 @@ module.exports = function(RED) {
 							$scope.getElement("timersView").style.display = "none";
 							$scope.getElement("messageBoard").style.display = "none";
 							$scope.getElement("addTimerView").style.display = "block";
-							$scope.formtimer = { index: timerIndex };
-							$scope.formtimer.dayselect = [];
-							$scope.formtimer.starttype = "custom";
-							$scope.formtimer.endtype = "sunset";
+							$scope.formtimer = {
+								index: timerIndex,
+								dayselect: [],
+								starttype: "custom",
+								endtype: "custom",
+							};
 
 							if (timerIndex === undefined) {
 								const today = new Date();
@@ -516,12 +519,15 @@ module.exports = function(RED) {
 								const endInput = $scope.getElement("timerEndtime").value.split(":");
 								let endtime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endInput[0], endInput[1], 0, 0).getTime();
 
-								if ($scope.formtimer.starttype === "custom" && $scope.diff(starttime, endtime) < 1) {
-									if (confirm($scope.i18n.alertTimespan)) endtime += 24 * 60 * 60 * 1000;
-									else return;
-								} else if ($scope.formtimer.starttype !== "custom") {
+								if ($scope.formtimer.endtype !== "custom") {
 									timer.endSolarEvent = $scope.formtimer.endtype;
 									timer.endSolarOffset = $scope.formtimer.endOffset;
+								}
+
+								if ($scope.formtimer.starttype === "custom" && $scope.formtimer.endtype === "custom" && $scope.diff(starttime, endtime) < 1) {
+									if (confirm($scope.i18n.alertTimespan)) endtime += 24 * 60 * 60 * 1000;
+									else return;
+								} else if ($scope.formtimer.starttype !== "custom" && $scope.formtimer.endtype !== "custom") {
 									if (timer.startSolarEvent === timer.endSolarEvent && (timer.startSolarOffset || 0) >= (timer.endSolarOffset || 0)) {
 										alert($scope.i18n.alertTimespanDay);
 										return;
@@ -898,6 +904,8 @@ module.exports = function(RED) {
 								const offset = t.endSolarOffset || 0;
 								const solarTime = sunTimes[t.endSolarEvent];
 								t.endtime = solarTime.getTime() + (offset * 60 * 1000);
+							}
+							if (t.hasOwnProperty("startSolarEvent") || t.hasOwnProperty("endSolarEvent")) {
 								if (t.starttime >= t.endtime) t.endtime += 24 * 60 * 60 * 1000;
 							}
 							return t;
