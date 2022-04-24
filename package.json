@@ -3,7 +3,7 @@
   "version": "1.17.0",
   "description": "A ui time scheduler for the Node-RED Dashboard",
   "dependencies": {
-    "suncalc": "^1.8.0"
+    "suncalc": "^1.9.0"
   },
   "main": "time-scheduler.js",
   "scripts": {
