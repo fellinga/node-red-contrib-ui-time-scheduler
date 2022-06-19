@@ -154,8 +154,8 @@ module.exports = function(RED) {
 							`}
 						</div>
 					</md-subheader>
-					<md-list-item class="md-2-line" style="height: 74px; padding: 0 5px; border-left: 2px solid {{timer.disabled ? 'red' : (timer.startSolarEvent || timer.endSolarEvent) ? '#FCD440' : 'transparent'}};" ng-repeat="timer in timers | filter:{ output: myDeviceSelect }:true track by $index">
-						<div class="md-list-item-text" ng-click="showAddView(timers.indexOf(timer))" style="opacity:{{timer.disabled ? 0.4 : 1}};">
+					<md-list-item class="md-2-line" style="height: 74px; padding: 0 5px; border-left: 2px solid {{(timer.disabled || !isDeviceEnabled(timer.output)) ? 'red' : (timer.startSolarEvent || timer.endSolarEvent) ? '#FCD440' : 'transparent'}};" ng-repeat="timer in timers | filter:{ output: myDeviceSelect }:true track by $index">
+						<div class="md-list-item-text" ng-click="showAddView(timers.indexOf(timer))" style="opacity:{{(timer.disabled || !isDeviceEnabled(timer.output)) ? 0.4 : 1}};">
 							<div layout="row">
 								<span flex=""> {{$index+1}} </span>
 								${config.eventMode ? `

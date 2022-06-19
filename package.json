@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-ui-time-scheduler",
-  "version": "1.17.0",
+  "version": "1.17.1",
   "description": "A ui time scheduler for the Node-RED Dashboard",
   "dependencies": {
     "suncalc": "^1.9.0"
@@ -12,9 +12,13 @@
   "author": "Mario Fellinger <mario.fellinger@outlook.com>",
   "license": "MIT",
   "node-red": {
+    "version": ">=0.19.6",
     "nodes": {
       "time_scheduler": "time-scheduler.js"
     }
+  },
+  "engines": {
+    "node": ">=12"
   },
   "keywords": [
     "node-red",

@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.17.1] - 2022-06-19
+
+### Changed
+- indicate disabled timer when device is disabled
+
+----------
 ## [v1.17.0] - 2022-04-24
 
 ### Changed
