@@ -41,7 +41,7 @@ module.exports = function(RED) {
 			}
 			#${divPrimary} md-select md-select-value {
 				color: var(--nr-dashboard-widgetTextColor);
-				border-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
+				border-color: var(--nr-dashboard-widgetColor);
 			}
 			#${divPrimary} md-select[disabled] md-select-value, input[type="text"]:disabled {
 				color: var(--nr-dashboard-widgetTextColor);
@@ -49,7 +49,7 @@ module.exports = function(RED) {
 			}
 			#${divPrimary} .md-button {
 				color: var(--nr-dashboard-widgetTextColor);
-				background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
+				background-color: var(--nr-dashboard-groupBackgroundColor);
 				min-width: 40px;
 			}
 			#${divPrimary} .md-subheader {
@@ -57,22 +57,21 @@ module.exports = function(RED) {
 			}
 			#${divPrimary} .md-subheader .md-subheader-inner {
 				color: var(--nr-dashboard-widgetTextColor);
-				background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
+				background-color: var(--nr-dashboard-groupBackgroundColor);
 				padding: 6px 5px;
 			}
 			#${divPrimary} md-icon {
-				color: var(--nr-dashboard-widgetTextColor);
+				color: var(--nr-dashboard-widgetColor);
 			}
 			#${divPrimary} md-progress-circular path {
 				stroke: var(--nr-dashboard-widgetTextColor);
 			}
 			#${divPrimary} .weekDay {
 				color: var(--nr-dashboard-widgetTextColor);
-				background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
+				background-color: var(--nr-dashboard-widgetColor);
 				width: 34px;
 				line-height: 34px;
 				display: inline-block;
-				border-radius: 50%;
 				opacity: 0.4;
 			}
 			#${divPrimary} .weekDayActive {
@@ -121,14 +120,13 @@ module.exports = function(RED) {
 					<md-list flex ng-cloak ng-if="(filteredDeviceTimers = (getTimersByOverviewFilter() | filter:{ output: $index.toString() }:true)).length">
 						<md-subheader> <span class="md-subhead"> {{devices[$index]}} </span> </md-subheader>
 						<md-list-item ng-repeat="timer in filteredDeviceTimers" style="min-height: 25px; height: 25px; padding: 0 2px;">
-							<span style="overflow-x: hidden; {{(timer.disabled || !isDeviceEnabled(timer.output)) ? 'opacity: 0.4;' : ''}}">
+							<span style="overflow-x: hidden; padding-left: 10px; {{(timer.disabled || !isDeviceEnabled(timer.output)) ? 'opacity: 0.4;' : ''}}">
 								{{millisToTime(timer.starttime)}}&#8209;${config.eventMode ? `{{eventToEventLabel(timer.event)}}` : `{{millisToTime(timer.endtime)}}`}
 							</span>
 							<div class="md-secondary" style=" {{(timer.disabled || !isDeviceEnabled(timer.output)) ? 'opacity: 0.4' : ''}};">
 								<span ng-repeat="day in days | limitTo : ${config.startDay}-7" ng-init="dayIndex=$index+${config.startDay}">{{timer.days[localDayToUtc(timer,dayIndex)]===1 ? ($index!=0 ? "&nbsp;" : "")+days[dayIndex] : ""}}</span>
 								<span ng-repeat="day in days | limitTo : -${config.startDay}" ng-init="dayIndex=$index">{{timer.days[localDayToUtc(timer,dayIndex)]===1 ? ($index!=0 ? "&nbsp;" : "")+days[dayIndex] : ""}}</span>
 							</div>
-							<md-divider ng-if="!$last"></md-divider>
 						</md-list-item>
 					<md-list>
 				</div>
@@ -296,7 +294,7 @@ module.exports = function(RED) {
 						</div>
 					</div>
 				</form>
-				<div ng-show="loading" layout="row" layout-align="center center" style="width:100%; position: absolute; z-index:10; opacity: 0.9; height:150px; background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);">
+				<div ng-show="loading" layout="row" layout-align="center center" style="width:100%; position: absolute; z-index:10; opacity: 0.9; height:150px; background-color: var(--nr-dashboard-widgetColor);">
 					<md-progress-circular md-mode="indeterminate"></md-progress-circular>
 				</div>
 			</div>
