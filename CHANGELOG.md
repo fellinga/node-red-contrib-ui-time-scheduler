@@ -1,6 +1,12 @@
 # Changelog
 
 ----------
+## [v1.17.2] - 2022-08-21
+
+### Changed
+- use widget color instead of titlebar color
+
+----------
 ## [v1.17.1] - 2022-06-19
 
 ### Changed

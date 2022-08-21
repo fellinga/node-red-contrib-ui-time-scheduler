@@ -41,7 +41,7 @@ module.exports = function(RED) {
 			}
 			#${divPrimary} md-select md-select-value {
 				color: var(--nr-dashboard-widgetTextColor);
-				border-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
+				border-color: var(--nr-dashboard-widgetColor);
 			}
 			#${divPrimary} md-select[disabled] md-select-value, input[type="text"]:disabled {
 				color: var(--nr-dashboard-widgetTextColor);
@@ -49,7 +49,7 @@ module.exports = function(RED) {
 			}
 			#${divPrimary} .md-button {
 				color: var(--nr-dashboard-widgetTextColor);
-				background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
+				background-color: var(--nr-dashboard-widgetColor);
 				min-width: 40px;
 			}
 			#${divPrimary} .md-subheader {
@@ -57,7 +57,7 @@ module.exports = function(RED) {
 			}
 			#${divPrimary} .md-subheader .md-subheader-inner {
 				color: var(--nr-dashboard-widgetTextColor);
-				background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
+				background-color: var(--nr-dashboard-widgetColor);
 				padding: 6px 5px;
 			}
 			#${divPrimary} md-icon {
@@ -68,7 +68,7 @@ module.exports = function(RED) {
 			}
 			#${divPrimary} .weekDay {
 				color: var(--nr-dashboard-widgetTextColor);
-				background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);
+				background-color: var(--nr-dashboard-widgetColor);
 				width: 34px;
 				line-height: 34px;
 				display: inline-block;
@@ -296,7 +296,7 @@ module.exports = function(RED) {
 						</div>
 					</div>
 				</form>
-				<div ng-show="loading" layout="row" layout-align="center center" style="width:100%; position: absolute; z-index:10; opacity: 0.9; height:150px; background-color: var(--nr-dashboard-pageTitlebarBackgroundColor);">
+				<div ng-show="loading" layout="row" layout-align="center center" style="width:100%; position: absolute; z-index:10; opacity: 0.9; height:150px; background-color: var(--nr-dashboard-widgetColor);">
 					<md-progress-circular md-mode="indeterminate"></md-progress-circular>
 				</div>
 			</div>
