@@ -75,11 +75,11 @@
             "nauticalDawn": "nautical dawn",
             "dawn": "dawn",
             "payloadWarning": "Invalid or no payload provided.",
-            "emptyOverview": "Nothing planned yet. Click \"Overview\" and select a device.",
-            "noActiveOverview": "No schedules are active. Click \"Overview\" and select a device.",
+            "emptyOverview": "Rien n'est encore prévu. Cliquez sur \"Overview\" et sélectionnez un appareil.",
+            "noActiveOverview": "Aucun horaire n'est actif. Cliquez sur \"Overview\" et sélectionnez un appareil.",
             "nothingPlanned": "Cliquez sur le signe plus pour ajouter une nouvelle minuterie.",
-            "alertTimespan": "Time frame exceeds midnight.\nDo you want to continue?",
-            "alertTimespanDay": "Time frame must not exceed 24 hours.",
+            "alertTimespan": "La plage horaire dépasse minuit.\nVoulez-vous continuer ?",
+            "alertTimespanDay": "La plage horaire ne doit pas dépasser 24 heures.",
             "selectAll": "Tous les jours"
         }
     }
