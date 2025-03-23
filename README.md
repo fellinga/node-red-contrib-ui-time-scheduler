@@ -1,6 +1,8 @@
 # node-red-contrib-ui-time-scheduler
-A node-red-ui time scheduler for the Node-RED Dashboard.  
-
+A node-red-ui time scheduler for the Node-RED Dashboard.
+___
+### NOTE: - This project is based on Angular v1 and node-red-dashboard - as both projects are now no longer maintained, this project should be considered to be deprecated as well.
+___
 | ![](images/time-scheduler.jpg) | ![](images/time-scheduler-em.jpg) |
 | :----------------------------: | :-------------------------------: |
 |         *Default Mode*         |           *Event Mode*            |
